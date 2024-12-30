@@ -13,6 +13,7 @@ find_package(Eigen3 3.3 REQUIRED)
 
 add_executable(flowbee
     src/main.cpp
+    src/image.cpp
 )
 
 target_link_libraries(flowbee PRIVATE Eigen3::Eigen)
