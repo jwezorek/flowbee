@@ -12,34 +12,6 @@ namespace rv = std::ranges::views;
 
 /*------------------------------------------------------------------------------------------------*/
 
-
-flo::image::image(int cols, int rows) : cols_(cols), rows_(rows), impl_(cols* rows)
-{
-}
-
-uint32_t& flo::image::operator[](int x, int y) {
-    return impl_[y * cols_ + x];
-}
-
-const uint32_t& flo::image::operator[](int x, int y) const {
-    return impl_[y * cols_ + x];
-}
-
-void* flo::image::data() const
-{
-    return reinterpret_cast<void*>(const_cast<uint32_t*>(impl_.data()));
-}
-
-int flo::image::cols() const
-{
-    return cols_;
-}
-
-int flo::image::rows() const
-{
-    return rows_;
-}
-
 void flo::write_to_file(const std::string& fname, const image& img) {
     auto extension = fs::path(fname).extension().string();
     if (extension != ".png" && extension != ".bmp") {
