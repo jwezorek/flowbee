@@ -4,7 +4,7 @@
 
 namespace flo {
 
-    using scalar_field = matrix<float>;
+    using scalar_field = matrix<double>;
 
     struct vector_field {
         scalar_field x;
