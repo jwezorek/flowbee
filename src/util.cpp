@@ -1,4 +1,4 @@
-#include "image.hpp"
+#include "util.hpp"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "third-party/stb_image_write.h"
 #include <ranges>

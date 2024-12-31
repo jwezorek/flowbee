@@ -4,7 +4,7 @@
 #include <string>
 #include <print>
 #include <ranges>
-#include "image.hpp"
+#include "util.hpp"
 
 namespace r = std::ranges;
 namespace rv = std::ranges::views;
@@ -27,6 +27,7 @@ int main(int argc, char* argv[]) {
     }
 
     flo::write_to_file("D:\\test\\test_img.png", img);
+    std::println("flowbee...");
 
     return 0;
 }
