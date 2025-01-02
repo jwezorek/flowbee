@@ -13,6 +13,14 @@ namespace flo {
     };
 
     template<typename T>
+    T locations(const dimensions& dim) {
+        return std::views::cartesian_product(
+            std::views::iota(0, dim.wd),
+            std::views::iota(0, dim.hgt)
+        );
+    }
+
+    template<typename T>
     class matrix {
         std::vector<T> impl_;
         int cols_;
@@ -22,7 +30,15 @@ namespace flo {
         {
         }
 
+        matrix(int cols, int rows, const T& v) : cols_(cols), rows_(rows), impl_(cols* rows, v)
+        {
+        }
+
         matrix(const dimensions& dim) : matrix(dim.wd, dim.hgt)
+        {
+        }
+
+        matrix(const dimensions& dim, const T& v) : matrix(dim.wd, dim.hgt, v)
         {
         }
 

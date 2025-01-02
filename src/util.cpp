@@ -1,6 +1,7 @@
 #include "util.hpp"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "third-party/stb_image_write.h"
+#include "third-party/PerlinNoise.hpp"
 #include <ranges>
 #include <filesystem>
 #include <stdexcept>
@@ -86,4 +87,55 @@ flo::scalar_field flo::white_noise(int wd, int hgt) {
     );
 
     return noise;
+}
+
+flo::scalar_field flo::perlin_noise(const flo::dimensions& sz, uint32_t seed, int octaves, double freq) {
+    auto noise = scalar_field(sz.hgt, sz.wd, 0.0);
+
+    siv::PerlinNoise perlin{ seed };
+    auto dim = std::max(sz.wd, sz.hgt);
+    double freq_per_pix = freq / dim;
+
+    for (auto y = 0; y < sz.hgt; ++y) {
+        for (auto x = 0; x < sz.wd; ++x) {
+            auto value = perlin.octave2D_01(x * freq_per_pix, y * freq_per_pix, octaves);
+            noise[x,y] = value;
+        }
+    }
+
+    return noise;
+}
+
+flo::vector_field flo::perlin_vector_field(
+        const flo::dimensions& sz, uint32_t seed1, uint32_t seed2,
+        int octaves, double freq) {
+
+    auto x_comp = perlin_noise(sz, seed1, octaves, freq);
+    auto y_comp = perlin_noise(sz, seed2, octaves, freq);
+
+    // Find the maximum magnitude using ranges::max and entries
+    auto max_magnitude = std::ranges::max(
+        std::views::zip(x_comp.entries(), y_comp.entries())
+        | std::views::transform([](auto&& pair) {
+            auto [v1, v2] = pair;
+            return std::sqrt(v1 * v1 + v2 * v2);
+            })
+    );
+
+    // Normalize vectors if max_magnitude > 1.0
+    if (max_magnitude > 1.0) {
+        x_comp.transform(
+            [&, max_magnitude](double value) {
+                return value / max_magnitude;
+            }
+        );
+
+        y_comp.transform(
+            [&, max_magnitude](double value) {
+                return value / max_magnitude;
+            }
+        );
+    }
+
+    return { x_comp, y_comp };
 }
