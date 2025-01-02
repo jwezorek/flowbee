@@ -5,6 +5,7 @@
 #include <print>
 #include <ranges>
 #include <unordered_map>
+#include <format>
 #include "util.hpp"
 #include "paint.hpp"
 
@@ -20,7 +21,10 @@ namespace {
         flo::write_to_file(out_file, img);
     }
 
-    void test_mix(const flo::image& img, const std::string& out_file) {
+    void test_mix(const std::string& inp, const std::string& out_file) {
+
+        auto img = flo::read_from_file(inp);
+
         std::unordered_map<uint32_t, int> pix_to_count;
         for (auto pix : img.entries()) {
             ++pix_to_count[pix];
@@ -49,7 +53,11 @@ int main(int argc, char* argv[]) {
 
     std::println("flowbee...");
 
-    test_mix(flo::read_from_file("D:\\test\\mix_test\\test1.png"), "D:\\test\\mix1.png");
+    for (int i = 1; i <= 5; ++i) {
+        auto inp = std::format("D:\\test\\mix_test\\inp\\test{}.png", i);
+        auto outp = std::format("D:\\test\\mix_test\\outp\\mix{}.png", i);
+        test_mix(inp, outp);
+    }
 
     return 0;
 }
