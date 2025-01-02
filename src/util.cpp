@@ -1,4 +1,6 @@
 #include "util.hpp"
+#define STB_IMAGE_IMPLEMENTATION
+#include "third-party/stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "third-party/stb_image_write.h"
 #include "third-party/PerlinNoise.hpp"
@@ -36,6 +38,19 @@ namespace {
 
 }
 
+uint32_t flo::rgb_to_pixel(const rgb_color& rgb)
+{
+    return 0xFF000000 | (rgb.blue << 16) | (rgb.green << 8) | rgb.red;
+}
+
+flo::rgb_color flo::pixel_to_rgb(uint32_t pixel) {
+    rgb_color rgb;
+    rgb.red = pixel & 0xFF;           
+    rgb.green = (pixel >> 8) & 0xFF;  
+    rgb.blue = (pixel >> 16) & 0xFF;  
+    return rgb;
+}
+
 void flo::write_to_file(const std::string& fname, const image& img) {
     auto extension = fs::path(fname).extension().string();
     if (extension != ".png" && extension != ".bmp") {
@@ -58,6 +73,21 @@ void flo::write_to_file(const std::string& fname, const image& img) {
             std::format("unknown error while writing {}", extension)
         );
     }
+}
+
+flo::image flo::read_from_file(const std::string& fname)
+{
+    int wd, hgt, n;
+    unsigned char *data = stbi_load(fname.c_str(), &wd, &hgt, &n, 4);
+    flo::image img(wd,hgt);
+    for (int y = 0; y < hgt; ++y) {
+        for (int x = 0; x < wd; ++x) {
+            auto ptr = data + y * wd * 4 + x * 4;
+            uint32_t pix = *reinterpret_cast<uint32_t*>(ptr);
+            img[x, y] = pix;
+        }
+    }
+    return img;
 }
 
 flo::scalar_field flo::normalize(const scalar_field& s) {

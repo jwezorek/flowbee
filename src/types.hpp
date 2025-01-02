@@ -4,6 +4,10 @@
 
 namespace flo {
 
+    struct rgb_color {
+        uint8_t red, green, blue;
+    };
+
     using scalar_field = matrix<double>;
 
     struct vector_field {

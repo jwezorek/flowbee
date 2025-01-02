@@ -5,7 +5,10 @@
 
 namespace flo {
 
+    uint32_t rgb_to_pixel(const rgb_color& rgb);
+    rgb_color pixel_to_rgb(uint32_t pix);
     void write_to_file(const std::string& fname, const image& img);
+    image read_from_file(const std::string& fname);
     scalar_field normalize(const scalar_field& s);
     image to_gray_scale_image(const scalar_field& sf, bool invert = false);
     scalar_field white_noise(int wd, int hgt);

@@ -12,9 +12,11 @@ endif()
 find_package(Eigen3 3.3 REQUIRED)
 
 add_executable(flowbee
+    src/third-party/mixbox.cpp
     src/main.cpp
     src/util.cpp
- )
+    src/paint.cpp 
+)
 
 target_link_libraries(flowbee PRIVATE Eigen3::Eigen)
 
