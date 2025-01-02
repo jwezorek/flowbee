@@ -15,7 +15,7 @@ namespace flo {
     // Paint Particle: Pigment with Volume
     struct paint_particle {
         pigment color;
-        float volume;
+        double volume;
     };
 
     pigment rgb_to_pigment(const rgb_color& rgb);

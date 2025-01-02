@@ -30,7 +30,7 @@ flo::pigment flo::mix_paint_particles(const std::vector<paint_particle>& particl
 
     pigment mixed_pigment;
     std::memset(mixed_pigment.impl, 0, sizeof(mixbox_latent)); // Initialize to zeros
-    float total_volume = 0.0f;
+    double total_volume = 0.0f;
 
     for (const auto& particle : particles) {
         for (int i = 0; i < MIXBOX_LATENT_SIZE; ++i) {
