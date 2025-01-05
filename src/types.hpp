@@ -20,4 +20,9 @@ namespace flo {
 
     using point = vec2<double>;
     using coords = vec2<int>;
+
+    struct rect {
+        coords min;
+        coords max;
+    };
 }

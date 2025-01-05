@@ -8,6 +8,7 @@
 #include <format>
 #include "util.hpp"
 #include "paint.hpp"
+#include "gui.hpp"
 
 namespace r = std::ranges;
 namespace rv = std::ranges::views;
@@ -49,15 +50,32 @@ namespace {
     }
 }
 
+
 int main(int argc, char* argv[]) {
 
     std::println("flowbee...");
-
+    
+    /*
     for (int i = 1; i <= 5; ++i) {
         auto inp = std::format("D:\\test\\mix_test\\inp\\test{}.png", i);
         auto outp = std::format("D:\\test\\mix_test\\outp\\mix{}.png", i);
         test_mix(inp, outp);
     }
+    */
+
+    float min = std::numeric_limits<float>::max();
+    float max = -std::numeric_limits<float>::max();
+
+    int n = 100000000;
+    for (int i = 0; i < n; ++i) {
+        auto color = flo::random_rgb_color();
+        auto latent = flo::rgb_to_pigment(color);
+        auto [min_val, max_val] = r::minmax(latent.impl);
+        min = std::min(min, min_val);
+        max = std::max(max, max_val);
+    }
+    std::println("[{} , ... , {}]", min, max);
+    //flo::do_gui();
 
     return 0;
 }

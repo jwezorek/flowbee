@@ -14,4 +14,5 @@ namespace flo {
     scalar_field white_noise(int wd, int hgt);
     scalar_field perlin_noise(const flo::dimensions& sz, uint32_t seed, int octaves, double freq);
     vector_field perlin_vector_field(const flo::dimensions& sz, uint32_t seed1, uint32_t seed2, int octaves, double freq);
+    rgb_color random_rgb_color();
 }

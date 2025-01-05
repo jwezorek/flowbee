@@ -1,6 +1,7 @@
 #include "paint.hpp"
 #include <stdexcept>
 #include <cstring> // For memset
+#include <print>
 
 flo::pigment flo::rgb_to_pigment(uint8_t r, uint8_t g, uint8_t b) {
     pigment p;
@@ -34,6 +35,15 @@ flo::pigment flo::mix_paint_particles(const std::vector<paint_particle>& particl
 
     for (const auto& particle : particles) {
         for (int i = 0; i < MIXBOX_LATENT_SIZE; ++i) {
+            std::println("{} {} {} {} {} {} {}",
+                particle.color.impl[0],
+                particle.color.impl[1],
+                particle.color.impl[2],
+                particle.color.impl[3],
+                particle.color.impl[4],
+                particle.color.impl[5],
+                particle.color.impl[6]
+            );
             mixed_pigment.impl[i] += particle.color.impl[i] * particle.volume;
         }
         total_volume += particle.volume;

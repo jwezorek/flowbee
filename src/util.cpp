@@ -169,3 +169,11 @@ flo::vector_field flo::perlin_vector_field(
 
     return { x_comp, y_comp };
 }
+
+flo::rgb_color flo::random_rgb_color() {
+    flo::rgb_color color;
+    color.red = static_cast<uint8_t>(std::round(uniform_rand(0.0, 255.0)));
+    color.green = static_cast<uint8_t>(std::round(uniform_rand(0.0, 255.0)));
+    color.blue = static_cast<uint8_t>(std::round(uniform_rand(0.0, 255.0)));
+    return color;
+}

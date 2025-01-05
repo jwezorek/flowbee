@@ -1,7 +1,8 @@
 #pragma once
 
 #include "types.hpp"
-#include "matrix.hpp
+#include "matrix.hpp"
+#include "paint.hpp"
 
 namespace flo {
 

@@ -2,13 +2,15 @@
 
 #include <functional>
 #include "types.hpp"
-#include "matrix.hpp"
+#include "canvas.hpp"
+#include "paint.hpp"
 
 namespace flo {
 
-    using mix_fn = std::function<double(double)>;
+    using mix_fn = std::function<double(double,double)>;
 
     struct brush {
+        point loc;
         double radius;
         double volume;
         paint_particle paint;
@@ -17,5 +19,6 @@ namespace flo {
         mix_fn update_canvas;
     };
 
+    void paint(canvas& canv, brush& brush, double t, int antialias, rect* dirty = nullptr);
 
 }
