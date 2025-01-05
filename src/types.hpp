@@ -1,6 +1,7 @@
 #pragma once
 
 #include "matrix.hpp"
+#include "vec2.hpp"
 
 namespace flo {
 
@@ -16,4 +17,7 @@ namespace flo {
     };
 
     using image = matrix<uint32_t>;
+
+    using point = vec2<double>;
+    using coords = vec2<int>;
 }

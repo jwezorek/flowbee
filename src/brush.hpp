@@ -17,8 +17,5 @@ namespace flo {
         mix_fn update_canvas;
     };
 
-    using canvas = matrix<paint_particle>;
-
-
 
 }
