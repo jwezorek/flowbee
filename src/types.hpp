@@ -16,5 +16,4 @@ namespace flo {
     };
 
     using image = matrix<uint32_t>;
-
 }

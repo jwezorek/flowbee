@@ -16,6 +16,7 @@ add_executable(flowbee
     src/main.cpp
     src/util.cpp
     src/paint.cpp 
+    src/brush.cpp
 )
 
 target_link_libraries(flowbee PRIVATE Eigen3::Eigen)
