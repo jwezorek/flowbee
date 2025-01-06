@@ -8,8 +8,7 @@ namespace flo {
 
     using canvas = matrix<paint_particle>;
 
-    template<typename T>
-    T brush_region(const dimensions& canvas_dimensions,
+    inline auto brush_region(const dimensions& canvas_dimensions,
             const point& brush_loc,
             double brush_radius,
             int anti_aliasing_level) {
@@ -68,5 +67,15 @@ namespace flo {
             );
     }
 
+    double brush_region_area(const dimensions& canvas_dimensions,
+        const point& brush_loc,
+        double brush_radius,
+        int anti_aliasing_level);
 
+    void fill(canvas& canv, const point& loc, double radius, int aa_level,
+        const paint_particle& paint);
+    void mix(canvas& canv, const point& loc, double radius, int aa_level);
+
+    canvas image_to_canvas(const image& img, double vol_per_pixel = 1.0);
+    image canvas_to_image(const canvas& canv);
 }

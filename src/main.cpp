@@ -8,6 +8,7 @@
 #include <format>
 #include "util.hpp"
 #include "paint.hpp"
+#include "canvas.hpp"
 #include "gui.hpp"
 
 namespace r = std::ranges;
@@ -63,18 +64,15 @@ int main(int argc, char* argv[]) {
     }
     */
 
-    float min = std::numeric_limits<float>::max();
-    float max = -std::numeric_limits<float>::max();
+    auto image = flo::read_from_file("D:\\test\\mix_test\\inp\\test2.png");
+    auto canvas = flo::image_to_canvas(image);
 
-    int n = 100000000;
-    for (int i = 0; i < n; ++i) {
-        auto color = flo::random_rgb_color();
-        auto latent = flo::rgb_to_pigment(color);
-        auto [min_val, max_val] = r::minmax(latent.impl);
-        min = std::min(min, min_val);
-        max = std::max(max, max_val);
-    }
-    std::println("[{} , ... , {}]", min, max);
+    flo::mix(canvas, { 50.5,50.5 }, 25.0, 4);
+
+    flo::write_to_file("D:\\test\\test_mix_brush.png",
+        flo::canvas_to_image(canvas)
+    );
+
     //flo::do_gui();
 
     return 0;

@@ -4,8 +4,11 @@
 #include <ranges>
 #include <algorithm>
 #include <span>
+#include "vec2.hpp"
 
 namespace flo {
+
+    using coords = vec2<int>;
 
     struct dimensions {
         int wd;
@@ -48,6 +51,14 @@ namespace flo {
 
         const T& operator[](int x, int y) const {
             return impl_[y * cols_ + x];
+        }
+
+        T& operator[](const coords& loc) {
+            return (*this)[loc.x, loc.y];
+        }
+
+        const T& operator[](const coords& loc) const {
+            return (*this)[loc.x, loc.y];
         }
 
         void* data() const {
