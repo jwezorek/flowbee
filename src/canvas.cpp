@@ -55,18 +55,24 @@ void flo::mix(canvas& canv, const point& loc, double radius, int aa_level) {
     auto volume_per_area = total_volume / area;
     paint_particle paint = { new_pigment, volume_per_area };
     for (const auto& [loc, weight] : flo::brush_region(canv.bounds(), loc, radius, aa_level)) {
+        const auto& existing_paint = canv[loc];
         if (weight == 1.0) {
             canv[loc] = paint;
             continue;
         }
-        auto c = canv[loc];
-        auto new_color = mix_pigments(
-            c.color, c.volume - volume_per_area * weight,
-            paint.color, paint.volume * weight
+        if (existing_paint.volume <= volume_per_area * weight) {
+            canv[loc] = { new_pigment, volume_per_area * weight };
+            continue;
+        }
+        auto new_pigment = mix_pigments(
+            existing_paint.color, 
+            existing_paint.volume - volume_per_area * weight,
+            paint.color,
+            paint.volume * weight
         );
-        auto new_volume = c.volume - volume_per_area * weight + paint.volume * weight;
+        auto new_volume = existing_paint.volume - volume_per_area * weight + paint.volume * weight;
 
-        canv[loc] = { new_color, new_volume };
+        canv[loc] = { new_pigment, new_volume };
     }
 }
 

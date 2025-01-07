@@ -51,7 +51,7 @@ flo::rgb_color flo::pixel_to_rgb(uint32_t pixel) {
     return rgb;
 }
 
-void flo::write_to_file(const std::string& fname, const image& img) {
+void flo::img_to_file(const std::string& fname, const image& img) {
     auto extension = fs::path(fname).extension().string();
     if (extension != ".png" && extension != ".bmp") {
         throw std::runtime_error("unknown output image format");
@@ -75,7 +75,7 @@ void flo::write_to_file(const std::string& fname, const image& img) {
     }
 }
 
-flo::image flo::read_from_file(const std::string& fname)
+flo::image flo::img_from_file(const std::string& fname)
 {
     int wd, hgt, n;
     unsigned char *data = stbi_load(fname.c_str(), &wd, &hgt, &n, 4);

@@ -1,10 +1,18 @@
 #include "gui.hpp"
 #include "types.hpp"
 #include "matrix.hpp"
+#include "canvas.hpp"
+#include "util.hpp"
+#include "paint.hpp"
 #include <windows.h>
 #include <windowsx.h>
 
 namespace {
+
+    flo::canvas g_canvas;
+    HBITMAP g_hbm;
+    bool g_is_dirty = true;
+
     LRESULT handle_paint(HWND hwnd);
     LRESULT handle_mouse_down(HWND hwnd, WPARAM w_param, LPARAM l_param);
     LRESULT handle_mouse_up(HWND hwnd, WPARAM w_param, LPARAM l_param);
@@ -33,14 +41,6 @@ namespace {
         }
     }
 
-    LRESULT handle_paint(HWND hwnd) {
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hwnd, &ps);
-        // Placeholder for painting logic
-        EndPaint(hwnd, &ps);
-        return 0;
-    }
-
     LRESULT handle_mouse_down(HWND hwnd, WPARAM w_param, LPARAM l_param) {
         // Placeholder for mouse down logic
         return 0;
@@ -55,9 +55,112 @@ namespace {
         // Placeholder for key down logic
         return 0;
     }
+
+    void ResizeWindowToClientSize(HWND hWnd, int desiredClientWidth, int desiredClientHeight) {
+        // Get the current window style and extended style
+        DWORD dwStyle = GetWindowLong(hWnd, GWL_STYLE);
+        DWORD dwExStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
+
+        // Get the current window rectangle
+        RECT windowRect;
+        GetWindowRect(hWnd, &windowRect);
+
+        // Create a rectangle representing the desired client area
+        RECT desiredRect = { 0, 0, desiredClientWidth, desiredClientHeight };
+
+        // Adjust the rectangle for the window's non-client area
+        AdjustWindowRectEx(&desiredRect, dwStyle, FALSE, dwExStyle);
+
+        // Calculate the width and height for the entire window
+        int newWindowWidth = desiredRect.right - desiredRect.left;
+        int newWindowHeight = desiredRect.bottom - desiredRect.top;
+
+        // Resize the window, keeping the current position
+        SetWindowPos(hWnd, nullptr,
+            windowRect.left, windowRect.top,
+            newWindowWidth, newWindowHeight,
+            SWP_NOZORDER | SWP_NOACTIVATE);
+    }
+
+    HBITMAP img_to_bmp(const flo::image& mat) {
+        const int width = mat.cols();
+        const int height = mat.rows();
+
+        // Define the bitmap information header
+        BITMAPINFO bmi = {};
+        bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+        bmi.bmiHeader.biWidth = width;
+        bmi.bmiHeader.biHeight = -height; // Negative to create a top-down DIB
+        bmi.bmiHeader.biPlanes = 1;
+        bmi.bmiHeader.biBitCount = 32; // 32 bits per pixel
+        bmi.bmiHeader.biCompression = BI_RGB; // No compression
+        bmi.bmiHeader.biSizeImage = 0; // Can be 0 for BI_RGB
+
+        // Pointer to the pixel data in the DIB
+        void* dibPixels = nullptr;
+
+        // Create a DIB section
+        HBITMAP hBitmap = CreateDIBSection(
+            nullptr,              // Use the default device context
+            &bmi,                 // Bitmap information
+            DIB_RGB_COLORS,       // Color table type (not used for 32-bit)
+            &dibPixels,           // Pointer to the actual pixel data
+            nullptr,              // No file mapping
+            0                     // File mapping offset
+        );
+
+        if (!hBitmap) {
+            return nullptr; // Return nullptr if bitmap creation failed
+        }
+
+        // Pointer to the pixel data in the matrix
+        const uint32_t* srcPixels = reinterpret_cast<const uint32_t*>(mat.data());
+        uint32_t* dstPixels = reinterpret_cast<uint32_t*>(dibPixels);
+
+        // Copy and convert the pixel data from RGBA to BGRA
+        for (int i = 0; i < width * height; ++i) {
+            uint32_t pixel = srcPixels[i];
+            uint32_t r = (pixel & 0x000000FF);
+            uint32_t g = (pixel & 0x0000FF00);
+            uint32_t b = (pixel & 0x00FF0000);
+            uint32_t a = (pixel & 0xFF000000);
+            dstPixels[i] = (b >> 16) | g | (r << 16) | a; // Swap R and B channels
+        }
+
+        return hBitmap;
+    }
+
+    LRESULT handle_paint(HWND hwnd) {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hwnd, &ps);
+        
+        if (g_is_dirty) {
+            g_hbm = img_to_bmp(flo::canvas_to_image(g_canvas));
+        }
+
+        HDC hdc_scr = GetDC(NULL);
+        HDC hdc_bmp = CreateCompatibleDC(hdc_scr);
+        auto hbm_old = SelectObject(hdc_bmp, g_hbm);
+
+        BitBlt(hdc, 0, 0, g_canvas.cols(), g_canvas.rows(), hdc_bmp, 0, 0, SRCCOPY);
+
+        SelectObject(hdc_bmp, hbm_old);
+        DeleteDC(hdc_bmp);
+        ReleaseDC(NULL, hdc_scr);
+
+        EndPaint(hwnd, &ps);
+
+        g_is_dirty = false;
+
+        return 0;
+    }
+
 }
 
-void flo::do_gui() {
+
+
+void flo::do_gui(const std::string& img_file) {
+
     const char class_name[] = "flowbee_window_class";
     HINSTANCE h_instance = GetModuleHandle(NULL);
     WNDCLASS wc = {};
@@ -87,6 +190,10 @@ void flo::do_gui() {
         MessageBox(NULL, "Window Creation Failed!", "Error", MB_ICONEXCLAMATION | MB_OK);
         return;
     }
+
+    g_canvas = flo::image_to_canvas(flo::img_from_file(img_file));
+    auto dims = g_canvas.bounds();
+    ResizeWindowToClientSize(hwnd, dims.wd, dims.hgt);
 
     ShowWindow(hwnd, SW_SHOW);
     UpdateWindow(hwnd);

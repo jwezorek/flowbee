@@ -19,6 +19,8 @@ namespace flo {
         mix_fn update_canvas;
     };
 
-    void paint(canvas& canv, brush& brush, double t, int antialias, rect* dirty = nullptr);
+    brush create_mixing_brush(const point& loc, double radius);
+
+    void paint(canvas& canv, brush& brush, double t, int antialias);
 
 }

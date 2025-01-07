@@ -29,6 +29,10 @@ namespace flo {
         int cols_;
         int rows_;
     public:
+        matrix() : cols_{0}, rows_{ 0 }
+        {
+        }
+
         matrix(int cols, int rows) : cols_(cols), rows_(rows), impl_(cols* rows)
         {
         }

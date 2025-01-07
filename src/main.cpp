@@ -20,12 +20,12 @@ namespace {
 
     void write_color_image(const flo::rgb_color& color, const std::string& out_file) {
         flo::image img(100, 100, flo::rgb_to_pixel(color));
-        flo::write_to_file(out_file, img);
+        flo::img_to_file(out_file, img);
     }
 
     void test_mix(const std::string& inp, const std::string& out_file) {
 
-        auto img = flo::read_from_file(inp);
+        auto img = flo::img_from_file(inp);
 
         std::unordered_map<uint32_t, int> pix_to_count;
         for (auto pix : img.entries()) {
@@ -64,16 +64,18 @@ int main(int argc, char* argv[]) {
     }
     */
 
-    auto image = flo::read_from_file("D:\\test\\mix_test\\inp\\test2.png");
-    auto canvas = flo::image_to_canvas(image);
+    /*
+    auto image = flo::img_from_file("D:\\test\\mix_test\\inp\\test2.png");
+    auto canvas = flo::image_to_canvas(image, 10.0);
 
     flo::mix(canvas, { 50.5,50.5 }, 25.0, 4);
 
-    flo::write_to_file("D:\\test\\test_mix_brush.png",
+    flo::img_to_file("D:\\test\\test_mix_brush.png",
         flo::canvas_to_image(canvas)
     );
+    */
 
-    //flo::do_gui();
+    flo::do_gui("D:\\test\\flower.png");
 
     return 0;
 }
