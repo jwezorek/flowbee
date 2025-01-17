@@ -2,6 +2,7 @@
 #include "types.hpp"
 #include "matrix.hpp"
 #include "canvas.hpp"
+#include "brush.hpp"
 #include "util.hpp"
 #include "paint.hpp"
 #include <windows.h>
@@ -12,9 +13,12 @@ namespace {
     flo::canvas g_canvas;
     HBITMAP g_hbm;
     bool g_is_dirty = true;
+    auto g_brush = flo::create_mixing_brush({ 0,0 }, 15.);
+    bool g_stroke_in_progress = false;
 
     LRESULT handle_paint(HWND hwnd);
     LRESULT handle_mouse_down(HWND hwnd, WPARAM w_param, LPARAM l_param);
+    LRESULT handle_mouse_move(HWND hwnd, WPARAM w_param, LPARAM l_param);
     LRESULT handle_mouse_up(HWND hwnd, WPARAM w_param, LPARAM l_param);
     LRESULT handle_key_down(HWND hwnd, WPARAM w_param, LPARAM l_param);
 
@@ -25,6 +29,9 @@ namespace {
 
         case WM_LBUTTONDOWN:
             return handle_mouse_down(hwnd, w_param, l_param);
+
+        case WM_MOUSEMOVE:
+            return handle_mouse_move(hwnd, w_param, l_param);
 
         case WM_LBUTTONUP:
             return handle_mouse_up(hwnd, w_param, l_param);
@@ -41,13 +48,31 @@ namespace {
         }
     }
 
+    flo::point to_point(LPARAM l_param) {
+        int x_pos = GET_X_LPARAM(l_param);
+        int y_pos = GET_Y_LPARAM(l_param);
+
+        // Convert the coordinates to double and store in point
+        return { static_cast<double>(x_pos), static_cast<double>(y_pos) };
+    }
+
     LRESULT handle_mouse_down(HWND hwnd, WPARAM w_param, LPARAM l_param) {
-        // Placeholder for mouse down logic
+        g_stroke_in_progress = true;
+        g_brush.loc = to_point(l_param);
+        flo::paint(g_canvas, g_brush, 0.0, 4);
+        return 0;
+    }
+
+    LRESULT handle_mouse_move(HWND hwnd, WPARAM w_param, LPARAM l_param) {
+        g_brush.loc = to_point(l_param);
+        flo::paint(g_canvas, g_brush, 0.0, 4);
         return 0;
     }
 
     LRESULT handle_mouse_up(HWND hwnd, WPARAM w_param, LPARAM l_param) {
-        // Placeholder for mouse up logic
+        g_stroke_in_progress = false;
+        g_stroke_in_progress = true;
+        InvalidateRect(hwnd, NULL, false); 
         return 0;
     }
 
@@ -156,8 +181,6 @@ namespace {
     }
 
 }
-
-
 
 void flo::do_gui(const std::string& img_file) {
 
