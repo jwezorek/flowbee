@@ -4,6 +4,8 @@
 #include "matrix.hpp"
 #include "paint.hpp"
 
+/*------------------------------------------------------------------------------------------------*/
+
 namespace flo {
 
     using canvas = matrix<paint_particle>;

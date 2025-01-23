@@ -6,6 +6,8 @@
 #include "third-party/mixbox.h"
 #include <unordered_map>
 
+/*------------------------------------------------------------------------------------------------*/
+
 namespace flo {
 
     struct pigment {

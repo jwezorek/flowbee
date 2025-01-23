@@ -3,6 +3,8 @@
 #include "types.hpp"
 #include <string>
 
+/*------------------------------------------------------------------------------------------------*/
+
 namespace flo {
 
     uint32_t rgb_to_pixel(const rgb_color& rgb);

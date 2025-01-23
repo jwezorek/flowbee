@@ -5,6 +5,8 @@
 #include "canvas.hpp"
 #include "paint.hpp"
 
+/*------------------------------------------------------------------------------------------------*/
+
 namespace flo {
 
     using mix_fn = std::function<double(double,double)>;

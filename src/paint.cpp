@@ -4,6 +4,8 @@
 #include <cstring> // For memset
 #include <print>
 
+/*------------------------------------------------------------------------------------------------*/
+
 namespace {
     constexpr float k_eps = 0.000005f;
     constexpr float k_mult = 1.0f / k_eps;

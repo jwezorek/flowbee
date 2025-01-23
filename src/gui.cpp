@@ -8,6 +8,8 @@
 #include <windows.h>
 #include <windowsx.h>
 
+/*------------------------------------------------------------------------------------------------*/
+
 namespace {
 
     flo::canvas g_canvas;
