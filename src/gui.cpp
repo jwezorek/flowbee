@@ -61,13 +61,13 @@ namespace {
     LRESULT handle_mouse_down(HWND hwnd, WPARAM w_param, LPARAM l_param) {
         g_stroke_in_progress = true;
         g_brush.loc = to_point(l_param);
-        flo::paint(g_canvas, g_brush, 0.0, 4);
+        flo::apply_paint(g_canvas, g_brush, 0.0, 4);
         return 0;
     }
 
     LRESULT handle_mouse_move(HWND hwnd, WPARAM w_param, LPARAM l_param) {
         g_brush.loc = to_point(l_param);
-        flo::paint(g_canvas, g_brush, 0.0, 4);
+        flo::apply_paint(g_canvas, g_brush, 0.0, 4);
         return 0;
     }
 
@@ -216,7 +216,7 @@ void flo::do_gui(const std::string& img_file) {
         return;
     }
 
-    g_canvas = flo::image_to_canvas(flo::img_from_file(img_file));
+    g_canvas = flo::image_to_canvas(flo::img_from_file(img_file), 4);
     auto dims = g_canvas.bounds();
     ResizeWindowToClientSize(hwnd, dims.wd, dims.hgt);
 

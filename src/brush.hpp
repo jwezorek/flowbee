@@ -15,7 +15,7 @@ namespace flo {
         point loc;
         double radius;
         double volume;
-        paint_particle paint;
+        paint paint;
         mix_fn update_radius;
         mix_fn update_volume;
         mix_fn update_canvas;
@@ -23,6 +23,6 @@ namespace flo {
 
     brush create_mixing_brush(const point& loc, double radius);
 
-    void paint(canvas& canv, brush& brush, double t, int antialias);
+    void apply_paint(canvas& canv, brush& brush, double t, int antialias);
 
 }

@@ -212,7 +212,7 @@ namespace flo {
         }
 
         int layers() const {
-            return cols_;
+            return layers_;
         }
 
         dimensions bounds() const {

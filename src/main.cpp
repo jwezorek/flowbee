@@ -24,7 +24,7 @@ namespace {
     }
 
     void test_mix(const std::string& inp, const std::string& out_file) {
-
+        /*
         auto img = flo::img_from_file(inp);
 
         std::unordered_map<uint32_t, int> pix_to_count;
@@ -48,6 +48,7 @@ namespace {
         );
 
         write_color_image(mix_color, out_file);
+        */
     }
 }
 
@@ -75,7 +76,7 @@ int main(int argc, char* argv[]) {
     );
     */
 
-    flo::do_gui("D:\\test\\flower.png");
+    //flo::do_gui("D:\\test\\flower.png");
 
     return 0;
 }

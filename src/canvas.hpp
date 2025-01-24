@@ -8,7 +8,18 @@
 
 namespace flo {
 
-    using canvas = matrix<paint_particle>;
+    class canvas {
+        std::vector<pigment> palette_;
+        matrix_3d<double> impl_;
+    public:
+        canvas() {}
+        canvas(const std::vector<rgb_color>& palette, int wd, int hgt);
+
+        int cols() const;
+        int rows() const;
+        int layers() const;
+        dimensions bounds() const;
+    };
 
     inline auto brush_region(const dimensions& canvas_dimensions,
             const point& brush_loc,
@@ -75,9 +86,11 @@ namespace flo {
         int anti_aliasing_level);
 
     void fill(canvas& canv, const point& loc, double radius, int aa_level,
-        const paint_particle& paint);
+        const paint& paint);
+    void overlay(canvas& canv, const point& loc, double radius, int aa_level,
+        const paint& paint);
     void mix(canvas& canv, const point& loc, double radius, int aa_level);
 
-    canvas image_to_canvas(const image& img, double vol_per_pixel = 1.0);
+    canvas image_to_canvas(const image& img, int n, double vol_per_pixel = 1.0);
     image canvas_to_image(const canvas& canv);
 }

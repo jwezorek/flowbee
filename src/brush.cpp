@@ -21,13 +21,9 @@ flo::brush flo::create_mixing_brush(const point& loc, double radius) {
 
 }
 
-void flo::paint(canvas& canv, brush& brush, double t, int aa_level) {
+void flo::apply_paint(canvas& canv, brush& brush, double t, int aa_level) {
 
     mix(canv, brush.loc, brush.radius, aa_level);
-    
-    if (brush.paint.volume == 0.0) {
-        return;
-    }
 
     //TODO
 

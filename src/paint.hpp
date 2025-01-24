@@ -26,14 +26,6 @@ namespace flo {
     template <typename T>
     using pigment_map = std::unordered_map<pigment, T, hash_pigment>;
 
-    struct paint_particle {
-        pigment color;
-        double volume;
-
-        paint_particle();
-        paint_particle(const pigment& p, double v);
-    };
-
     pigment rgb_to_pigment(const rgb_color& rgb);
     pigment rgb_to_pigment(uint8_t r, uint8_t g, uint8_t b);
 
@@ -41,6 +33,7 @@ namespace flo {
     rgb_color pigment_to_rgb(const pigment& p);
 
     pigment mix_pigments(const pigment& a, double a_vol, const pigment& b, double b_vol);
-    pigment mix_paint_particles(const std::vector<paint_particle>& particles);
     pigment mix_paint(const pigment_map<double>& pigments);
+
+    using paint = std::vector<double>;
 }

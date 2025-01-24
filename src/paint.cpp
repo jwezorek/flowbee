@@ -62,32 +62,6 @@ flo::pigment flo::mix_pigments(const pigment& a, double a_vol, const pigment& b,
     return (1.0 / vol) * mixed_pigment;
 }
 
-flo::pigment flo::mix_paint_particles(const std::vector<paint_particle>& particles) {
-    if (particles.empty()) {
-        throw std::invalid_argument("Cannot mix an empty set of paint particles.");
-    }
-
-    pigment mixed_pigment;
-    std::memset(mixed_pigment.impl, 0, sizeof(mixbox_latent)); // Initialize to zeros
-    double total_volume = 0.0f;
-
-    for (const auto& particle : particles) {
-        for (int i = 0; i < MIXBOX_LATENT_SIZE; ++i) {
-            mixed_pigment.impl[i] += particle.color.impl[i] * particle.volume;
-        }
-        total_volume += particle.volume;
-    }
-
-    // Normalize the mixed pigment by the total volume
-    if (total_volume > 0.0f) {
-        for (int i = 0; i < MIXBOX_LATENT_SIZE; ++i) {
-            mixed_pigment.impl[i] /= total_volume;
-        }
-    }
-
-    return mixed_pigment;
-}
-
 flo::pigment flo::mix_paint(const pigment_map<double>& pigments) {
     if (pigments.empty()) {
         throw std::invalid_argument("Cannot mix an empty set of pigments.");
@@ -139,12 +113,3 @@ size_t flo::hash_pigment::operator()(const pigment& p) const {
     return seed;
 }
 
-flo::paint_particle::paint_particle() : 
-    color{0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f },
-    volume(0.0)
-{ }
-
-flo::paint_particle::paint_particle(const pigment & p, double v) :
-    color(p), volume(v)
-{
-}
