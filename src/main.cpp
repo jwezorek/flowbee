@@ -78,5 +78,16 @@ int main(int argc, char* argv[]) {
 
     //flo::do_gui("D:\\test\\flower.png");
 
+    std::vector<flo::rgb_color> colors = {
+        {255,255,255},
+        {0,255,0},
+        {0,0,255}
+    };
+    flo::canvas canv(colors, 512, 512, 0, 10.0);
+    flo::fill(canv, { 256,256 }, 50.0, 4, { 0,10.0,0 });
+    flo::img_to_file("D:\\test\\test_refactor.png",
+        flo::canvas_to_image(canv)
+    );
+
     return 0;
 }

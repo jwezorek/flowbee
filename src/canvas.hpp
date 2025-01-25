@@ -14,11 +14,17 @@ namespace flo {
     public:
         canvas() {}
         canvas(const std::vector<rgb_color>& palette, int wd, int hgt);
+        canvas(const std::vector<rgb_color>& palette, int wd, int hgt, int bkgd, double amnt);
+
+        matrix_3d<double>& cells();
+        const matrix_3d<double>& cells() const;
 
         int cols() const;
         int rows() const;
         int layers() const;
         dimensions bounds() const;
+
+        pigment color_at(int x, int y) const;
     };
 
     inline auto brush_region(const dimensions& canvas_dimensions,

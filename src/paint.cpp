@@ -3,6 +3,10 @@
 #include <stdexcept>
 #include <cstring> // For memset
 #include <print>
+#include <ranges>
+
+namespace r = std::ranges;
+namespace rv = std::ranges::views;
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -86,6 +90,14 @@ flo::pigment flo::mix_paint(const pigment_map<double>& pigments) {
     }
 
     return mixed_pigment;
+}
+
+flo::paint flo::operator*(double k, const paint& paint) {
+    return paint | rv::transform(
+            [k](auto v)->double {
+                return k * v;
+            }
+        ) | r::to<std::vector>();
 }
 
 bool flo::pigment::operator==(const pigment& p) const {

@@ -36,4 +36,5 @@ namespace flo {
     pigment mix_paint(const pigment_map<double>& pigments);
 
     using paint = std::vector<double>;
+    paint operator*(double k, const paint& paint);
 }
