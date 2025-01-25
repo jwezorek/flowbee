@@ -89,5 +89,11 @@ int main(int argc, char* argv[]) {
         flo::canvas_to_image(canv)
     );
 
+    auto image = flo::img_from_file("D:\\test\\mix_test\\inp\\test2.png");
+    auto test = flo::image_to_canvas(image, 4, 1.0);
+    flo::img_to_file("D:\\test\\test_canvas.png",
+        flo::canvas_to_image(test)
+    );
+
     return 0;
 }

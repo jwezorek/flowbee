@@ -136,3 +136,9 @@ size_t flo::hash_pigment::operator()(const pigment& p) const {
 flo::paint flo::create_paint(int num_colors) {
     return flo::paint( num_colors, 0.0 );
 }
+
+flo::paint flo::make_paint(int num_colors, int index, double val) {
+    auto paint = create_paint(num_colors);
+    paint[index] = val;
+    return paint;
+}

@@ -39,4 +39,5 @@ namespace flo {
     paint operator*(double k, const paint& paint);
     paint& operator+=(paint& lhs, const paint& rhs);
     paint create_paint(int num_colors);
+    paint make_paint(int num_colors, int index, double val);
 }
