@@ -1,4 +1,5 @@
 #include "paint.hpp"
+#include "matrix_3d.hpp"
 #include <boost/functional/hash.hpp>
 #include <stdexcept>
 #include <cstring> // For memset
@@ -100,6 +101,13 @@ flo::paint flo::operator*(double k, const paint& paint) {
         ) | r::to<std::vector>();
 }
 
+flo::paint& flo::operator+=(flo::paint& lhs, const flo::paint& rhs) {
+    for (int i = 0; i < lhs.size(); ++i) {
+        lhs[i] += rhs[i];
+    }
+    return lhs;
+}
+
 bool flo::pigment::operator==(const pigment& p) const {
 
     static const auto approx_eql = [](float u, float v)->bool {
@@ -125,3 +133,6 @@ size_t flo::hash_pigment::operator()(const pigment& p) const {
     return seed;
 }
 
+flo::paint flo::create_paint(int num_colors) {
+    return flo::paint( num_colors, 0.0 );
+}

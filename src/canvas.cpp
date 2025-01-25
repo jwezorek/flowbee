@@ -15,7 +15,14 @@ namespace {
     flo::pigment to_pigment(const flo::rgb_color& col) {
         return rgb_to_pigment(col);
     }
-
+    flo::paint brush_region_sum(flo::canvas& canvas, const flo::point& loc, double radius, int aa_level) {
+        flo::paint sum = flo::create_paint(canvas.palette_size());
+        auto& canv = canvas.cells();
+        for (const auto& [loc, paint_pcnt] : brush_region(canv.bounds(), loc, radius, aa_level)) {
+            sum += paint_pcnt * canv[loc];
+        }
+        return sum;
+    }
 }
 
 flo::canvas::canvas(const std::vector<rgb_color>& palette, int wd, int hgt) :
@@ -63,16 +70,16 @@ flo::dimensions flo::canvas::bounds() const {
 
 flo::pigment flo::canvas::color_at(int x, int y) const {
     pigment_map<double> color_to_weight;
+
     for (auto [i, pigment] : rv::enumerate(palette_)) {
         color_to_weight[pigment] = impl_[x, y, static_cast<int>(i)];
     }
-    /*
-    if (impl_[x, y, 0] != 10.0) {
-        int aaa;
-        aaa = 5;
-    }
-    */
+
     return mix_paint(color_to_weight);
+}
+
+int flo::canvas::palette_size() const {
+    return static_cast<int>(palette_.size());
 }
 
 double flo::brush_region_area(const dimensions& dim, const point& loc, double rad, int aa) {
@@ -85,24 +92,23 @@ double flo::brush_region_area(const dimensions& dim, const point& loc, double ra
 
 void flo::fill(canvas& canvas, const point& loc, double radius, int aa_level, const paint& paint) {
     auto& canv = canvas.cells();
-    int num_paints = static_cast<int>(paint.size());
     for (const auto& [loc, paint_pcnt] : brush_region(canv.bounds(), loc, radius, aa_level)) {
-        if (paint_pcnt == 1.0) {
-            canv[loc] = paint;
-            continue;
-        }
-        auto canv_pcnt = 1.0 - paint_pcnt;
-        canv[loc] = canv_pcnt * canv[loc] + paint_pcnt * paint;
+        canv[loc] = (1.0 - paint_pcnt) * canv[loc] + paint_pcnt * paint;
     }
 }
 
-void flo::overlay(canvas& canv, const point& loc, double radius, int aa_level, const paint& paint)
-{
+void flo::overlay(canvas& canvas, const point& loc, double radius, int aa_level, const paint& paint) {
+    auto& canv = canvas.cells();
+    for (const auto& [loc, paint_pcnt] : brush_region(canv.bounds(), loc, radius, aa_level)) {
+        canv[loc] += paint_pcnt * paint;
+    }
 }
 
 void flo::mix(canvas& canv, const point& loc, double radius, int aa_level) {
     auto area = brush_region_area(canv.bounds(), loc, radius, aa_level);
-    
+    auto paint_sum = brush_region_sum(canv, loc, radius, aa_level);
+    auto mean_color = (1.0 / area) * paint_sum;
+    fill(canv, loc, radius, aa_level, mean_color);
 }
 
 flo::canvas flo::image_to_canvas(const image& img, int n, double vol_per_pixel)

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.hpp"
-#include "matrix.hpp"
+#include "matrix_3d.hpp"
 #include "paint.hpp"
 
 /*------------------------------------------------------------------------------------------------*/
@@ -25,6 +25,7 @@ namespace flo {
         dimensions bounds() const;
 
         pigment color_at(int x, int y) const;
+        int palette_size() const;
     };
 
     inline auto brush_region(const dimensions& canvas_dimensions,
@@ -99,4 +100,5 @@ namespace flo {
 
     canvas image_to_canvas(const image& img, int n, double vol_per_pixel = 1.0);
     image canvas_to_image(const canvas& canv);
+
 }
