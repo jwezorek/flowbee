@@ -7,23 +7,29 @@ namespace {
 
 }
 
-flo::brush flo::create_mixing_brush(const point& loc, double radius) {
+flo::brush flo::create_mixing_brush(double radius) {
 
     return brush{
-        .loc = loc,
         .radius = radius,
         .volume = 0.0,
         .paint = {},
-        .update_radius = {},
-        .update_volume = {},
-        .update_canvas = {}
+        .mix = true,
+        .from_brush_fn = {},
+        .from_canv_fn = {}
     };
 
 }
 
-void flo::apply_paint(canvas& canv, brush& brush, double t, int aa_level) {
+flo::brush flo::create_simple_brush(const paint& p, double volume, double radius)
+{
+    return brush();
+}
 
-    mix(canv, brush.loc, brush.radius, aa_level);
+void flo::apply_brush(canvas& canv, brush& brush, const point& loc, double t, int aa_level) {
+
+    if (brush.mix) {
+        mix(canv, loc, brush.radius, aa_level);
+    }
 
     //TODO
 

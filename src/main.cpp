@@ -43,12 +43,16 @@ int main(int argc, char* argv[]) {
 
     std::println("flowbee...");
 
+    /*
     std::vector<int> colors = { 3,4,3,5,3 };
     for (int i = 1; i <= 5; ++i) {
         auto inp = std::format("D:\\test\\mix_test\\inp\\test{}.png", i);
         auto outp = std::format("D:\\test\\mix_test\\outp\\mix{}.png", i);
         test_mix(inp, colors[i-1], outp);
     }
+    */
 
+    flo::do_gui("D:\\test\\test.png", 6);
+    //flo::do_gui("D:\\test\\mix_test\\inp\\test4.png", 5);
     return 0;
 }

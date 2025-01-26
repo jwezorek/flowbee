@@ -15,7 +15,7 @@ namespace {
     flo::canvas g_canvas;
     HBITMAP g_hbm;
     bool g_is_dirty = true;
-    auto g_brush = flo::create_mixing_brush({ 0,0 }, 15.);
+    auto g_brush = flo::create_mixing_brush(8.0);
     bool g_stroke_in_progress = false;
 
     LRESULT handle_paint(HWND hwnd);
@@ -59,21 +59,24 @@ namespace {
     }
 
     LRESULT handle_mouse_down(HWND hwnd, WPARAM w_param, LPARAM l_param) {
+        g_is_dirty = true;
         g_stroke_in_progress = true;
-        g_brush.loc = to_point(l_param);
-        flo::apply_paint(g_canvas, g_brush, 0.0, 4);
+        flo::apply_brush(g_canvas, g_brush, to_point(l_param), 0.0, 4);
+        InvalidateRect(hwnd, NULL, false);
         return 0;
     }
 
     LRESULT handle_mouse_move(HWND hwnd, WPARAM w_param, LPARAM l_param) {
-        g_brush.loc = to_point(l_param);
-        flo::apply_paint(g_canvas, g_brush, 0.0, 4);
+        if (g_stroke_in_progress) {
+            g_is_dirty = true;
+            flo::apply_brush(g_canvas, g_brush, to_point(l_param), 0.0, 4);
+            InvalidateRect(hwnd, NULL, false);
+        }
         return 0;
     }
 
     LRESULT handle_mouse_up(HWND hwnd, WPARAM w_param, LPARAM l_param) {
         g_stroke_in_progress = false;
-        g_stroke_in_progress = true;
         InvalidateRect(hwnd, NULL, false); 
         return 0;
     }
@@ -184,7 +187,7 @@ namespace {
 
 }
 
-void flo::do_gui(const std::string& img_file) {
+void flo::do_gui(const std::string& img_file, int n) {
 
     const char class_name[] = "flowbee_window_class";
     HINSTANCE h_instance = GetModuleHandle(NULL);
@@ -216,7 +219,7 @@ void flo::do_gui(const std::string& img_file) {
         return;
     }
 
-    g_canvas = flo::image_to_canvas(flo::img_from_file(img_file), 4);
+    g_canvas = flo::image_to_canvas(flo::img_from_file(img_file), 6);
     auto dims = g_canvas.bounds();
     ResizeWindowToClientSize(hwnd, dims.wd, dims.hgt);
 

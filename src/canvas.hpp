@@ -92,6 +92,8 @@ namespace flo {
         double brush_radius,
         int anti_aliasing_level);
 
+    paint all_paint_in_brush_region(flo::canvas& canvas, const flo::point& loc, double radius, int aa_level);
+
     void fill(canvas& canv, const point& loc, double radius, int aa_level,
         const paint& paint);
     void overlay(canvas& canv, const point& loc, double radius, int aa_level,

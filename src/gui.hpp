@@ -6,6 +6,6 @@
 
 namespace flo {
 
-    void do_gui(const std::string& img_file);
+    void do_gui(const std::string& img_file, int n);
 
 }

@@ -18,15 +18,6 @@ namespace {
         return rgb_to_pigment(col);
     }
 
-    flo::paint brush_region_sum(flo::canvas& canvas, const flo::point& loc, double radius, int aa_level) {
-        flo::paint sum = flo::create_paint(canvas.palette_size());
-        auto& canv = canvas.cells();
-        for (const auto& [loc, paint_pcnt] : brush_region(canv.bounds(), loc, radius, aa_level)) {
-            sum += paint_pcnt * canv[loc];
-        }
-        return sum;
-    }
-
     std::vector<uint32_t> top_n_colors(const flo::image& img, int n) {
         std::unordered_map<uint32_t, int> pixel_count;
         for (auto pixel : img.entries()) {
@@ -146,7 +137,7 @@ void flo::overlay(canvas& canvas, const point& loc, double radius, int aa_level,
 
 void flo::mix(canvas& canv, const point& loc, double radius, int aa_level) {
     auto area = brush_region_area(canv.bounds(), loc, radius, aa_level);
-    auto paint_sum = brush_region_sum(canv, loc, radius, aa_level);
+    auto paint_sum = all_paint_in_brush_region(canv, loc, radius, aa_level);
     auto mean_color = (1.0 / area) * paint_sum;
     fill(canv, loc, radius, aa_level, mean_color);
 }
@@ -169,4 +160,13 @@ flo::image flo::canvas_to_image(const canvas& canv)
         img[x, y] = rgb_to_pixel(pigment_to_rgb(canv.color_at(x, y)));
     }
     return img;
+}
+
+flo::paint flo::all_paint_in_brush_region(canvas& canvas, const point& loc, double radius, int aa_level) {
+    flo::paint sum = flo::create_paint(canvas.palette_size());
+    auto& canv = canvas.cells();
+    for (const auto& [loc, paint_pcnt] : brush_region(canv.bounds(), loc, radius, aa_level)) {
+        sum += paint_pcnt * canv[loc];
+    }
+    return sum;
 }

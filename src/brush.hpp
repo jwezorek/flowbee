@@ -12,17 +12,17 @@ namespace flo {
     using mix_fn = std::function<double(double,double)>;
 
     struct brush {
-        point loc;
         double radius;
         double volume;
         paint paint;
-        mix_fn update_radius;
-        mix_fn update_volume;
-        mix_fn update_canvas;
+        bool mix;
+        mix_fn from_brush_fn;
+        mix_fn from_canv_fn;
     };
 
-    brush create_mixing_brush(const point& loc, double radius);
+    brush create_mixing_brush(double radius);
+    brush create_simple_brush(const paint& p, double volume, double radius);
 
-    void apply_paint(canvas& canv, brush& brush, double t, int antialias);
+    void apply_brush(canvas& canv, brush& brush, const point& loc, double t, int antialias);
 
 }
