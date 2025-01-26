@@ -23,32 +23,18 @@ namespace {
         flo::img_to_file(out_file, img);
     }
 
-    void test_mix(const std::string& inp, const std::string& out_file) {
-        /*
+    void test_mix(const std::string& inp, int n, const std::string& out_file) {
         auto img = flo::img_from_file(inp);
+        auto dim = img.bounds();
 
-        std::unordered_map<uint32_t, int> pix_to_count;
-        for (auto pix : img.entries()) {
-            ++pix_to_count[pix];
-        }
+        double radius = 3.0 * dim.wd / 8.0;
+        double x = dim.wd / 2.0;
+        double y = dim.hgt / 2.0;
 
-        auto particles = pix_to_count | rv::transform(
-                [](const auto& pix_count)->flo::paint_particle {
-                    const auto& [pix, count] = pix_count;
-                    auto rgb = flo::pixel_to_rgb(pix);
-                    return {
-                        rgb_to_pigment(rgb),
-                        static_cast<float>(count)
-                    };
-                }
-            ) | r::to<std::vector>();
+        auto canvas = flo::image_to_canvas(img, n);
+        flo::mix(canvas, { x,y }, radius, 4);
 
-        auto mix_color = pigment_to_rgb(
-            mix_paint_particles(particles)
-        );
-
-        write_color_image(mix_color, out_file);
-        */
+        flo::img_to_file( out_file, flo::canvas_to_image(canvas) );
     }
 }
 
@@ -56,44 +42,13 @@ namespace {
 int main(int argc, char* argv[]) {
 
     std::println("flowbee...");
-    
-    /*
+
+    std::vector<int> colors = { 3,4,3,5,3 };
     for (int i = 1; i <= 5; ++i) {
         auto inp = std::format("D:\\test\\mix_test\\inp\\test{}.png", i);
         auto outp = std::format("D:\\test\\mix_test\\outp\\mix{}.png", i);
-        test_mix(inp, outp);
+        test_mix(inp, colors[i-1], outp);
     }
-    */
-
-    /*
-    auto image = flo::img_from_file("D:\\test\\mix_test\\inp\\test2.png");
-    auto canvas = flo::image_to_canvas(image, 10.0);
-
-    flo::mix(canvas, { 50.5,50.5 }, 25.0, 4);
-
-    flo::img_to_file("D:\\test\\test_mix_brush.png",
-        flo::canvas_to_image(canvas)
-    );
-    */
-
-    //flo::do_gui("D:\\test\\flower.png");
-
-    std::vector<flo::rgb_color> colors = {
-        {255,255,255},
-        {0,255,0},
-        {0,0,255}
-    };
-    flo::canvas canv(colors, 512, 512, 0, 10.0);
-    flo::fill(canv, { 256,256 }, 50.0, 4, { 0,10.0,0 });
-    flo::img_to_file("D:\\test\\test_refactor.png",
-        flo::canvas_to_image(canv)
-    );
-
-    auto image = flo::img_from_file("D:\\test\\mix_test\\inp\\test2.png");
-    auto test = flo::image_to_canvas(image, 4, 1.0);
-    flo::img_to_file("D:\\test\\test_canvas.png",
-        flo::canvas_to_image(test)
-    );
 
     return 0;
 }
