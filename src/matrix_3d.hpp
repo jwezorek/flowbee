@@ -55,8 +55,14 @@ namespace flo {
                 return *this;
             }
 
-            cell_proxy operator+(cell_proxy other) {
-                return *this += other;
+            //cell_proxy operator+(cell_proxy other) {
+            //    return *this += other;
+            //}
+
+            void clamp_nonnegative() {
+                for (int i = 0; i < layers_; ++i) {
+                    data_[i] = (data_[i] >= 0.0) ? data_[i] : 0.0;
+                }
             }
 
             static friend cell_proxy operator*(double k, cell_proxy proxy) {

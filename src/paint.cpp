@@ -108,6 +108,33 @@ flo::paint& flo::operator+=(flo::paint& lhs, const flo::paint& rhs) {
     return lhs;
 }
 
+flo::paint& flo::operator-=(paint& lhs, const paint& rhs) {
+    for (int i = 0; i < lhs.size(); ++i) {
+        lhs[i] -= rhs[i];
+    }
+    return lhs;
+}
+
+flo::paint flo::operator+(const paint& lhs, const paint& rhs) {
+    auto sum = lhs;
+    sum += rhs;
+    return sum;
+}
+
+flo::paint flo::operator-(const paint& lhs, const paint& rhs) {
+    auto difference = lhs;
+    difference -= rhs;
+    return difference;
+}
+
+flo::paint& flo::clamp_nonnegative(paint& p)
+{
+    for (int i = 0; i < p.size(); ++i) {
+        p[i] = (p[i] >= 0.0) ? p[i] : 0.0;
+    }
+    return p;
+}
+
 bool flo::pigment::operator==(const pigment& p) const {
 
     static const auto approx_eql = [](float u, float v)->bool {

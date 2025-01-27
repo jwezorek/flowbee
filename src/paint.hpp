@@ -38,6 +38,11 @@ namespace flo {
     using paint = std::vector<double>;
     paint operator*(double k, const paint& paint);
     paint& operator+=(paint& lhs, const paint& rhs);
+    paint& operator-=(paint& lhs, const paint& rhs);
+    paint operator+(const paint& lhs, const paint& rhs);
+    paint operator-(const paint& lhs, const paint& rhs);
+    paint& clamp_nonnegative(paint& p);
+
     paint create_paint(int num_colors);
     paint make_paint(int num_colors, int index, double val);
 }

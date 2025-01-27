@@ -132,6 +132,7 @@ void flo::overlay(canvas& canvas, const point& loc, double radius, int aa_level,
     auto& canv = canvas.cells();
     for (const auto& [loc, paint_pcnt] : brush_region(canv.bounds(), loc, radius, aa_level)) {
         canv[loc] += paint_pcnt * paint;
+        canv[loc].clamp_nonnegative();
     }
 }
 
