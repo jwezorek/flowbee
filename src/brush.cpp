@@ -53,8 +53,7 @@ void flo::apply_brush(canvas& canv, brush& brush, const point& loc, double delta
     auto canvas_delta_per_pixel = (1.0 / brush_rgn_area) * canvas_delta;
     overlay(canv, loc, brush.radius, aa_level, canvas_delta_per_pixel);
 
-    brush.paint = brush.paint - paint_from_brush + paint_from_canvas;
-    clamp_nonnegative(brush.paint);
+    brush.paint = clamp_nonnegative(brush.paint - paint_from_brush + paint_from_canvas);
 }
 
 

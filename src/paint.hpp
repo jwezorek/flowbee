@@ -41,7 +41,8 @@ namespace flo {
     paint& operator-=(paint& lhs, const paint& rhs);
     paint operator+(const paint& lhs, const paint& rhs);
     paint operator-(const paint& lhs, const paint& rhs);
-    paint& clamp_nonnegative(paint& p);
+    paint clamp_nonnegative(const paint& p);
+    paint normalize(const paint& p);
 
     paint create_paint(int num_colors);
     paint make_paint(int num_colors, int index, double val);

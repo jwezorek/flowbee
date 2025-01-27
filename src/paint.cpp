@@ -127,12 +127,22 @@ flo::paint flo::operator-(const paint& lhs, const paint& rhs) {
     return difference;
 }
 
-flo::paint& flo::clamp_nonnegative(paint& p)
+flo::paint flo::clamp_nonnegative(const paint& inp)
 {
+    auto p = inp;
     for (int i = 0; i < p.size(); ++i) {
         p[i] = (p[i] >= 0.0) ? p[i] : 0.0;
     }
     return p;
+}
+
+flo::paint flo::normalize(const paint& p) {
+    auto sum = r::fold_left(p, 0.0, std::plus<>());
+    return p | rv::transform(
+        [sum](auto v) {
+            return v / sum;
+        }
+    ) | r::to<std::vector>();
 }
 
 bool flo::pigment::operator==(const pigment& p) const {
