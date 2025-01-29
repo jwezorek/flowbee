@@ -1,7 +1,6 @@
 #pragma once
 
 #include "types.hpp"
-#include "matrix_3d.hpp"
 #include "paint.hpp"
 
 /*------------------------------------------------------------------------------------------------*/
@@ -10,14 +9,14 @@ namespace flo {
 
     class canvas {
         std::vector<pigment> palette_;
-        matrix_3d<double> impl_;
+        matrix<paint> impl_;
     public:
         canvas() {}
         canvas(const std::vector<rgb_color>& palette, int wd, int hgt);
         canvas(const std::vector<rgb_color>& palette, int wd, int hgt, int bkgd, double amnt);
 
-        matrix_3d<double>& cells();
-        const matrix_3d<double>& cells() const;
+        matrix<paint>& cells();
+        const matrix<paint>& cells() const;
 
         int cols() const;
         int rows() const;

@@ -61,7 +61,7 @@ flo::canvas::canvas(const std::vector<rgb_color>& palette, int wd, int hgt) :
         palette | rv::transform( to_pigment ) | r::to<std::vector>()
     },
     impl_{
-        wd, hgt, static_cast<int>(palette.size()), 0.0
+        //TODO
     }
 {
 }
@@ -70,16 +70,17 @@ flo::canvas::canvas( const std::vector<rgb_color>& palette, int wd, int hgt, int
         canvas(palette, wd, hgt) {
     for (int y = 0; y < hgt; ++y) {
         for (int x = 0; x < wd; ++x) {
-            impl_[x, y, bkgd] = amnt;
+            //[x, y, bkgd] = amnt;
+            //TODO
         }
     }
 }
 
-flo::matrix_3d<double>& flo::canvas::cells() {
+flo::matrix<flo::paint>& flo::canvas::cells() {
     return impl_;
 }
 
-const flo::matrix_3d<double>& flo::canvas::cells() const {
+const flo::matrix<flo::paint>& flo::canvas::cells() const {
     return impl_;
 }
 
@@ -92,7 +93,7 @@ int flo::canvas::rows() const {
 }
 
 int flo::canvas::layers() const {
-    return  impl_.layers();
+    return  palette_.size();
 }
 
 flo::dimensions flo::canvas::bounds() const {
@@ -103,7 +104,8 @@ flo::pigment flo::canvas::color_at(int x, int y) const {
     pigment_map<double> color_to_weight;
 
     for (auto [i, pigment] : rv::enumerate(palette_)) {
-        color_to_weight[pigment] = impl_[x, y, static_cast<int>(i)];
+        //color_to_weight[pigment] = impl_[x, y, static_cast<int>(i)];
+        //TODO
     }
 
     return mix_paint(color_to_weight);
@@ -132,7 +134,6 @@ void flo::overlay(canvas& canvas, const point& loc, double radius, int aa_level,
     auto& canv = canvas.cells();
     for (const auto& [loc, paint_pcnt] : brush_region(canv.bounds(), loc, radius, aa_level)) {
         canv[loc] += paint_pcnt * paint;
-        canv[loc].clamp_nonnegative();
     }
 }
 
@@ -149,7 +150,8 @@ flo::canvas flo::image_to_canvas(const image& img, int n, double vol_per_pixel) 
     for (auto [x, y] : locations(img.bounds())) {
         auto color = pixel_to_rgb(img[x, y]);
         int palette_index = find_closest_color(color, palette);
-        canv.cells()[x,y] = make_paint(n, palette_index, vol_per_pixel);
+        //canv.cells()[x,y] = make_paint(n, palette_index, vol_per_pixel);
+        //TODO
     }
     return canv;
 }
@@ -164,7 +166,9 @@ flo::image flo::canvas_to_image(const canvas& canv)
 }
 
 flo::paint flo::all_paint_in_brush_region(canvas& canvas, const point& loc, double radius, int aa_level) {
-    flo::paint sum = flo::create_paint(canvas.palette_size());
+    //flo::paint sum = flo::create_paint(canvas.palette_size());
+    //TODO
+    flo::paint sum;
     auto& canv = canvas.cells();
     for (const auto& [loc, paint_pcnt] : brush_region(canv.bounds(), loc, radius, aa_level)) {
         sum += paint_pcnt * canv[loc];

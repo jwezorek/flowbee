@@ -1,5 +1,4 @@
 #include "paint.hpp"
-#include "matrix_3d.hpp"
 #include <boost/functional/hash.hpp>
 #include <stdexcept>
 #include <cstring> // For memset
@@ -14,6 +13,13 @@ namespace rv = std::ranges::views;
 namespace {
     constexpr float k_eps = 0.000005f;
     constexpr float k_mult = 1.0f / k_eps;
+
+    void normalize(std::vector<double>& vec) {
+        auto sum = r::fold_left(vec, 0.0, std::plus<>());
+        for (auto& v : vec) {
+            v /= sum;
+        }
+    }
 }
 
 flo::pigment flo::rgb_to_pigment(uint8_t r, uint8_t g, uint8_t b) {
@@ -93,26 +99,28 @@ flo::pigment flo::mix_paint(const pigment_map<double>& pigments) {
     return mixed_pigment;
 }
 
-flo::paint flo::operator*(double k, const paint& paint) {
-    return paint | rv::transform(
-            [k](auto v)->double {
-                return k * v;
-            }
-        ) | r::to<std::vector>();
+flo::paint flo::operator*(double k, const paint& p) {
+    return { k * p.volume(), p.mixture() };
 }
 
-flo::paint& flo::operator+=(flo::paint& lhs, const flo::paint& rhs) {
-    for (int i = 0; i < lhs.size(); ++i) {
-        lhs[i] += rhs[i];
-    }
-    return lhs;
+flo::paint& flo::operator+=(flo::paint& paint_lhs, const flo::paint& paint_rhs) {
+    auto new_mixture = rv::zip(paint_lhs.mixture(), paint_rhs.mixture()) |
+        rv::transform(
+            [&](const auto& pair) {
+                const auto& [lhs, rhs] = pair;
+                return paint_lhs.volume() * lhs + paint_rhs.volume() * rhs;
+            }
+        ) | r::to<std::vector>();
+    normalize(new_mixture);
+    paint_lhs = paint{
+        paint_lhs.volume() + paint_rhs.volume(),
+        new_mixture
+    };
+    return paint_lhs;
 }
 
 flo::paint& flo::operator-=(paint& lhs, const paint& rhs) {
-    for (int i = 0; i < lhs.size(); ++i) {
-        lhs[i] -= rhs[i];
-    }
-    return lhs;
+    return lhs += (-1.0) * rhs;
 }
 
 flo::paint flo::operator+(const paint& lhs, const paint& rhs) {
@@ -125,24 +133,6 @@ flo::paint flo::operator-(const paint& lhs, const paint& rhs) {
     auto difference = lhs;
     difference -= rhs;
     return difference;
-}
-
-flo::paint flo::clamp_nonnegative(const paint& inp)
-{
-    auto p = inp;
-    for (int i = 0; i < p.size(); ++i) {
-        p[i] = (p[i] >= 0.0) ? p[i] : 0.0;
-    }
-    return p;
-}
-
-flo::paint flo::normalize(const paint& p) {
-    auto sum = r::fold_left(p, 0.0, std::plus<>());
-    return p | rv::transform(
-        [sum](auto v) {
-            return v / sum;
-        }
-    ) | r::to<std::vector>();
 }
 
 bool flo::pigment::operator==(const pigment& p) const {
@@ -170,12 +160,22 @@ size_t flo::hash_pigment::operator()(const pigment& p) const {
     return seed;
 }
 
-flo::paint flo::create_paint(int num_colors) {
-    return flo::paint( num_colors, 0.0 );
+flo::paint::paint(double volume, const std::vector<double>& mixture) :
+    volume_(volume), mixture_(mixture)
+{
 }
 
-flo::paint flo::make_paint(int num_colors, int index, double val) {
-    auto paint = create_paint(num_colors);
-    paint[index] = val;
-    return paint;
+flo::paint::paint(double volume, int n) :
+    volume_(volume), mixture_(n, 0.0)
+{
+}
+
+double flo::paint::volume() const
+{
+    return volume_;
+}
+
+const std::vector<double>& flo::paint::mixture() const
+{
+    return mixture_;
 }

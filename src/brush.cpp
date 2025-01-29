@@ -26,10 +26,12 @@ flo::brush flo::create_simple_brush(
         .paint = vol * p,
         .mix = false,
         .from_brush_fn = [from_brush](const paint& p, double area, double t)->paint {
-            return (t * from_brush * area) * normalize(p);
+            //return (t * from_brush * area) * normalize(p);
+            return {}; //TODO
         },
         .from_canv_fn = [from_canvas](const paint& p, double area, double t)->paint {
-            return (t * from_canvas) * normalize(p);
+            //return (t * from_canvas) * normalize(p);
+            return {}; //TODO
         }
     };
 }
@@ -53,7 +55,7 @@ void flo::apply_brush(canvas& canv, brush& brush, const point& loc, double delta
     auto canvas_delta_per_pixel = (1.0 / brush_rgn_area) * canvas_delta;
     overlay(canv, loc, brush.radius, aa_level, canvas_delta_per_pixel);
 
-    brush.paint = clamp_nonnegative(brush.paint - paint_from_brush + paint_from_canvas);
+    //brush.paint = clamp_nonnegative(brush.paint - paint_from_brush + paint_from_canvas);
 }
 
 

@@ -35,15 +35,23 @@ namespace flo {
     pigment mix_pigments(const pigment& a, double a_vol, const pigment& b, double b_vol);
     pigment mix_paint(const pigment_map<double>& pigments);
 
-    using paint = std::vector<double>;
+    class paint {
+        double volume_;
+        std::vector<double> mixture_;
+    public:
+        paint(double volume = 0.0, const std::vector<double>& mixture = {});
+        paint(double volume, int n);
+        double volume() const;
+        const std::vector<double>& mixture() const;
+    };
+
     paint operator*(double k, const paint& paint);
     paint& operator+=(paint& lhs, const paint& rhs);
     paint& operator-=(paint& lhs, const paint& rhs);
     paint operator+(const paint& lhs, const paint& rhs);
     paint operator-(const paint& lhs, const paint& rhs);
-    paint clamp_nonnegative(const paint& p);
-    paint normalize(const paint& p);
+    //paint normalize(const paint& p);
 
-    paint create_paint(int num_colors);
-    paint make_paint(int num_colors, int index, double val);
+    //paint create_paint(int num_colors);
+    //paint make_paint(int num_colors, int index, double val);
 }
