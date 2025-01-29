@@ -24,5 +24,7 @@ namespace flo {
     paint_particle& operator-=(paint_particle& lhs, const paint_particle& rhs);
     paint_particle operator+(const paint_particle& lhs, const paint_particle& rhs);
     paint_particle operator-(const paint_particle& lhs, const paint_particle& rhs);
+    paint_particle normalize(const paint_particle& p);
 
+    paint_particle make_one_color_paint(int palette_sz, int color_index, double volume);
 }

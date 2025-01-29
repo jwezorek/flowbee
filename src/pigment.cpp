@@ -111,7 +111,7 @@ flo::paint_particle& flo::operator+=(flo::paint_particle& paint_lhs, const flo::
                 return paint_lhs.volume() * lhs + paint_rhs.volume() * rhs;
             }
         ) | r::to<std::vector>();
-    normalize(new_mixture);
+    ::normalize(new_mixture);
     paint_lhs = paint_particle{
         paint_lhs.volume() + paint_rhs.volume(),
         new_mixture
@@ -133,6 +133,16 @@ flo::paint_particle flo::operator-(const paint_particle& lhs, const paint_partic
     auto difference = lhs;
     difference -= rhs;
     return difference;
+}
+
+flo::paint_particle flo::normalize(const paint_particle& p) {
+    return { 1.0, p.mixture() };
+}
+
+flo::paint_particle flo::make_one_color_paint(int palette_sz, int color_index, double volume) {
+    auto mixture = std::vector<double>(palette_sz, 0.0);
+    mixture[color_index] = 1.0;
+    return { volume, mixture };
 }
 
 bool flo::pigment::operator==(const pigment& p) const {

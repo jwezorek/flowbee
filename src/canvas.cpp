@@ -61,7 +61,7 @@ flo::canvas::canvas(const std::vector<rgb_color>& palette, int wd, int hgt) :
         palette | rv::transform( to_pigment ) | r::to<std::vector>()
     },
     impl_{
-        //TODO
+        wd, hgt, {1.0, std::vector<double>(palette.size(), 0.0)}
     }
 {
 }
@@ -70,8 +70,7 @@ flo::canvas::canvas( const std::vector<rgb_color>& palette, int wd, int hgt, int
         canvas(palette, wd, hgt) {
     for (int y = 0; y < hgt; ++y) {
         for (int x = 0; x < wd; ++x) {
-            //[x, y, bkgd] = amnt;
-            //TODO
+            impl_[x, y] = make_one_color_paint(palette.size(), bkgd, amnt);
         }
     }
 }
@@ -104,8 +103,8 @@ flo::pigment flo::canvas::color_at(int x, int y) const {
     pigment_map<double> color_to_weight;
 
     for (auto [i, pigment] : rv::enumerate(palette_)) {
-        //color_to_weight[pigment] = impl_[x, y, static_cast<int>(i)];
-        //TODO
+        const auto& particle = impl_[x, y].mixture();
+        color_to_weight[pigment] = particle.at(i);
     }
 
     return mix_paint(color_to_weight);
@@ -150,8 +149,7 @@ flo::canvas flo::image_to_canvas(const image& img, int n, double vol_per_pixel) 
     for (auto [x, y] : locations(img.bounds())) {
         auto color = pixel_to_rgb(img[x, y]);
         int palette_index = find_closest_color(color, palette);
-        //canv.cells()[x,y] = make_paint(n, palette_index, vol_per_pixel);
-        //TODO
+        canv.cells()[x, y] = make_one_color_paint(n, palette_index, vol_per_pixel);
     }
     return canv;
 }
@@ -166,9 +164,7 @@ flo::image flo::canvas_to_image(const canvas& canv)
 }
 
 flo::paint_particle flo::all_paint_in_brush_region(canvas& canvas, const point& loc, double radius, int aa_level) {
-    //flo::paint sum = flo::create_paint(canvas.palette_size());
-    //TODO
-    flo::paint_particle sum;
+    flo::paint_particle sum(0.0, canvas.palette_size());
     auto& canv = canvas.cells();
     for (const auto& [loc, paint_pcnt] : brush_region(canv.bounds(), loc, radius, aa_level)) {
         sum += paint_pcnt * canv[loc];

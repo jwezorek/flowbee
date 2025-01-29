@@ -20,7 +20,7 @@ namespace flo {
     };
 
     brush create_mixing_brush(double radius);
-    brush create_simple_brush(const paint_particle& p, double volume, double radius,
+    brush create_simple_brush(const paint_particle& p, double radius,
         double from_canvas, double from_brush
     );
 

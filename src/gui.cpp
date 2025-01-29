@@ -15,7 +15,7 @@ namespace {
     flo::canvas g_canvas;
     HBITMAP g_hbm;
     bool g_is_dirty = true;
-    auto g_brush = flo::create_simple_brush({} /*flo::make_paint(5, 2, 1.0)*/, 20000.0, 5.0, 0.75, 0.1); //TODO
+    auto g_brush = flo::create_simple_brush(flo::make_one_color_paint(5, 2, 20000.0), 5.0, 0.75, 0.1);
     bool g_stroke_in_progress = false;
 
     LRESULT handle_paint(HWND hwnd);
