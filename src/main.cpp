@@ -52,8 +52,8 @@ int main(int argc, char* argv[]) {
     }
     */
 
-    flo::do_gui("D:\\test\\test.png", 6);
-    //flo::do_gui("D:\\test\\mix_test\\inp\\test4.png", 5);
+    //flo::do_gui("D:\\test\\test.png", 6);
+    flo::do_gui("D:\\test\\mix_test\\inp\\test4.png", 5);
 
     return 0;
 }

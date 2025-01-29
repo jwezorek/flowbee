@@ -9,7 +9,7 @@
 
 namespace flo {
 
-    using mix_fn = std::function<paint(const paint&,double)>;
+    using mix_fn = std::function<paint(const paint&, double, double)>;
 
     struct brush {
         double radius;

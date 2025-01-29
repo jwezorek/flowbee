@@ -25,11 +25,11 @@ flo::brush flo::create_simple_brush(
         .radius = radius,
         .paint = vol * p,
         .mix = false,
-        .from_brush_fn = [from_brush](const paint& p, double t)->paint {
-            return {};
+        .from_brush_fn = [from_brush](const paint& p, double area, double t)->paint {
+            return (t * from_brush * area) * normalize(p);
         },
-        .from_canv_fn = [from_canvas](const paint& p, double t)->paint {
-            return {};
+        .from_canv_fn = [from_canvas](const paint& p, double area, double t)->paint {
+            return (t * from_canvas) * normalize(p);
         }
     };
 }
@@ -46,8 +46,8 @@ void flo::apply_brush(canvas& canv, brush& brush, const point& loc, double delta
 
     auto brush_rgn_area = brush_region_area(canv.bounds(), loc, brush.radius, aa_level);
     auto paint_on_canvas = all_paint_in_brush_region(canv, loc, brush.radius, aa_level);
-    auto paint_from_canvas = brush.from_canv_fn(paint_on_canvas, delta_t);
-    auto paint_from_brush = brush.from_brush_fn(brush.paint, delta_t);
+    auto paint_from_canvas = brush.from_canv_fn(paint_on_canvas, brush_rgn_area, delta_t);
+    auto paint_from_brush = brush.from_brush_fn(brush.paint, brush_rgn_area, delta_t);
 
     auto canvas_delta = paint_on_canvas - paint_from_canvas + paint_from_brush;
     auto canvas_delta_per_pixel = (1.0 / brush_rgn_area) * canvas_delta;
