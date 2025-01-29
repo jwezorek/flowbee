@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <format>
 #include "util.hpp"
-#include "paint.hpp"
+#include "paint_particle.hpp"
 #include "canvas.hpp"
 #include "gui.hpp"
 

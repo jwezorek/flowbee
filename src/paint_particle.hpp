@@ -35,21 +35,21 @@ namespace flo {
     pigment mix_pigments(const pigment& a, double a_vol, const pigment& b, double b_vol);
     pigment mix_paint(const pigment_map<double>& pigments);
 
-    class paint {
+    class paint_particle {
         double volume_;
         std::vector<double> mixture_;
     public:
-        paint(double volume = 0.0, const std::vector<double>& mixture = {});
-        paint(double volume, int n);
+        paint_particle(double volume = 0.0, const std::vector<double>& mixture = {});
+        paint_particle(double volume, int n);
         double volume() const;
         const std::vector<double>& mixture() const;
     };
 
-    paint operator*(double k, const paint& paint);
-    paint& operator+=(paint& lhs, const paint& rhs);
-    paint& operator-=(paint& lhs, const paint& rhs);
-    paint operator+(const paint& lhs, const paint& rhs);
-    paint operator-(const paint& lhs, const paint& rhs);
+    paint_particle operator*(double k, const paint_particle& paint);
+    paint_particle& operator+=(paint_particle& lhs, const paint_particle& rhs);
+    paint_particle& operator-=(paint_particle& lhs, const paint_particle& rhs);
+    paint_particle operator+(const paint_particle& lhs, const paint_particle& rhs);
+    paint_particle operator-(const paint_particle& lhs, const paint_particle& rhs);
     //paint normalize(const paint& p);
 
     //paint create_paint(int num_colors);

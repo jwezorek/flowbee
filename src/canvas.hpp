@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.hpp"
-#include "paint.hpp"
+#include "paint_particle.hpp"
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -9,14 +9,14 @@ namespace flo {
 
     class canvas {
         std::vector<pigment> palette_;
-        matrix<paint> impl_;
+        matrix<paint_particle> impl_;
     public:
         canvas() {}
         canvas(const std::vector<rgb_color>& palette, int wd, int hgt);
         canvas(const std::vector<rgb_color>& palette, int wd, int hgt, int bkgd, double amnt);
 
-        matrix<paint>& cells();
-        const matrix<paint>& cells() const;
+        matrix<paint_particle>& cells();
+        const matrix<paint_particle>& cells() const;
 
         int cols() const;
         int rows() const;
@@ -91,12 +91,12 @@ namespace flo {
         double brush_radius,
         int anti_aliasing_level);
 
-    paint all_paint_in_brush_region(flo::canvas& canvas, const flo::point& loc, double radius, int aa_level);
+    paint_particle all_paint_in_brush_region(flo::canvas& canvas, const flo::point& loc, double radius, int aa_level);
 
     void fill(canvas& canv, const point& loc, double radius, int aa_level,
-        const paint& paint);
+        const paint_particle& paint);
     void overlay(canvas& canv, const point& loc, double radius, int aa_level,
-        const paint& paint);
+        const paint_particle& paint);
     void mix(canvas& canv, const point& loc, double radius, int aa_level);
 
     canvas image_to_canvas(const image& img, int n, double vol_per_pixel = 1.0);

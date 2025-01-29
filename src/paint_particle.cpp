@@ -1,4 +1,4 @@
-#include "paint.hpp"
+#include "paint_particle.hpp"
 #include <boost/functional/hash.hpp>
 #include <stdexcept>
 #include <cstring> // For memset
@@ -99,11 +99,11 @@ flo::pigment flo::mix_paint(const pigment_map<double>& pigments) {
     return mixed_pigment;
 }
 
-flo::paint flo::operator*(double k, const paint& p) {
+flo::paint_particle flo::operator*(double k, const paint_particle& p) {
     return { k * p.volume(), p.mixture() };
 }
 
-flo::paint& flo::operator+=(flo::paint& paint_lhs, const flo::paint& paint_rhs) {
+flo::paint_particle& flo::operator+=(flo::paint_particle& paint_lhs, const flo::paint_particle& paint_rhs) {
     auto new_mixture = rv::zip(paint_lhs.mixture(), paint_rhs.mixture()) |
         rv::transform(
             [&](const auto& pair) {
@@ -112,24 +112,24 @@ flo::paint& flo::operator+=(flo::paint& paint_lhs, const flo::paint& paint_rhs) 
             }
         ) | r::to<std::vector>();
     normalize(new_mixture);
-    paint_lhs = paint{
+    paint_lhs = paint_particle{
         paint_lhs.volume() + paint_rhs.volume(),
         new_mixture
     };
     return paint_lhs;
 }
 
-flo::paint& flo::operator-=(paint& lhs, const paint& rhs) {
+flo::paint_particle& flo::operator-=(paint_particle& lhs, const paint_particle& rhs) {
     return lhs += (-1.0) * rhs;
 }
 
-flo::paint flo::operator+(const paint& lhs, const paint& rhs) {
+flo::paint_particle flo::operator+(const paint_particle& lhs, const paint_particle& rhs) {
     auto sum = lhs;
     sum += rhs;
     return sum;
 }
 
-flo::paint flo::operator-(const paint& lhs, const paint& rhs) {
+flo::paint_particle flo::operator-(const paint_particle& lhs, const paint_particle& rhs) {
     auto difference = lhs;
     difference -= rhs;
     return difference;
@@ -160,22 +160,22 @@ size_t flo::hash_pigment::operator()(const pigment& p) const {
     return seed;
 }
 
-flo::paint::paint(double volume, const std::vector<double>& mixture) :
+flo::paint_particle::paint_particle(double volume, const std::vector<double>& mixture) :
     volume_(volume), mixture_(mixture)
 {
 }
 
-flo::paint::paint(double volume, int n) :
+flo::paint_particle::paint_particle(double volume, int n) :
     volume_(volume), mixture_(n, 0.0)
 {
 }
 
-double flo::paint::volume() const
+double flo::paint_particle::volume() const
 {
     return volume_;
 }
 
-const std::vector<double>& flo::paint::mixture() const
+const std::vector<double>& flo::paint_particle::mixture() const
 {
     return mixture_;
 }

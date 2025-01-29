@@ -76,11 +76,11 @@ flo::canvas::canvas( const std::vector<rgb_color>& palette, int wd, int hgt, int
     }
 }
 
-flo::matrix<flo::paint>& flo::canvas::cells() {
+flo::matrix<flo::paint_particle>& flo::canvas::cells() {
     return impl_;
 }
 
-const flo::matrix<flo::paint>& flo::canvas::cells() const {
+const flo::matrix<flo::paint_particle>& flo::canvas::cells() const {
     return impl_;
 }
 
@@ -123,14 +123,14 @@ double flo::brush_region_area(const dimensions& dim, const point& loc, double ra
     );
 }
 
-void flo::fill(canvas& canvas, const point& loc, double radius, int aa_level, const paint& paint) {
+void flo::fill(canvas& canvas, const point& loc, double radius, int aa_level, const paint_particle& paint) {
     auto& canv = canvas.cells();
     for (const auto& [loc, paint_pcnt] : brush_region(canv.bounds(), loc, radius, aa_level)) {
         canv[loc] = (1.0 - paint_pcnt) * canv[loc] + paint_pcnt * paint;
     }
 }
 
-void flo::overlay(canvas& canvas, const point& loc, double radius, int aa_level, const paint& paint) {
+void flo::overlay(canvas& canvas, const point& loc, double radius, int aa_level, const paint_particle& paint) {
     auto& canv = canvas.cells();
     for (const auto& [loc, paint_pcnt] : brush_region(canv.bounds(), loc, radius, aa_level)) {
         canv[loc] += paint_pcnt * paint;
@@ -165,10 +165,10 @@ flo::image flo::canvas_to_image(const canvas& canv)
     return img;
 }
 
-flo::paint flo::all_paint_in_brush_region(canvas& canvas, const point& loc, double radius, int aa_level) {
+flo::paint_particle flo::all_paint_in_brush_region(canvas& canvas, const point& loc, double radius, int aa_level) {
     //flo::paint sum = flo::create_paint(canvas.palette_size());
     //TODO
-    flo::paint sum;
+    flo::paint_particle sum;
     auto& canv = canvas.cells();
     for (const auto& [loc, paint_pcnt] : brush_region(canv.bounds(), loc, radius, aa_level)) {
         sum += paint_pcnt * canv[loc];

@@ -4,7 +4,7 @@
 #include "canvas.hpp"
 #include "brush.hpp"
 #include "util.hpp"
-#include "paint.hpp"
+#include "paint_particle.hpp"
 #include <windows.h>
 #include <windowsx.h>
 

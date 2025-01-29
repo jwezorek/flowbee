@@ -20,16 +20,16 @@ flo::brush flo::create_mixing_brush(double radius) {
 }
 
 flo::brush flo::create_simple_brush(
-    const paint& p, double vol, double radius, double from_canvas, double from_brush) {
+    const paint_particle& p, double vol, double radius, double from_canvas, double from_brush) {
     return brush{
         .radius = radius,
         .paint = vol * p,
         .mix = false,
-        .from_brush_fn = [from_brush](const paint& p, double area, double t)->paint {
+        .from_brush_fn = [from_brush](const paint_particle& p, double area, double t)->paint_particle {
             //return (t * from_brush * area) * normalize(p);
             return {}; //TODO
         },
-        .from_canv_fn = [from_canvas](const paint& p, double area, double t)->paint {
+        .from_canv_fn = [from_canvas](const paint_particle& p, double area, double t)->paint_particle {
             //return (t * from_canvas) * normalize(p);
             return {}; //TODO
         }
