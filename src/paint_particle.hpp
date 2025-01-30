@@ -14,7 +14,6 @@ namespace flo {
         std::vector<double> mixture_;
     public:
         paint_particle(double volume = 0.0, const std::vector<double>& mixture = {});
-        paint_particle(double volume, int n);
         double volume() const;
         const std::vector<double>& mixture() const;
     };

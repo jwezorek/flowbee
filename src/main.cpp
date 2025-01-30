@@ -9,6 +9,7 @@
 #include "util.hpp"
 #include "paint_particle.hpp"
 #include "canvas.hpp"
+#include "brush.hpp"
 #include "gui.hpp"
 
 namespace r = std::ranges;
@@ -53,7 +54,18 @@ int main(int argc, char* argv[]) {
     */
 
     //flo::do_gui("D:\\test\\test.png", 6);
-    flo::do_gui("D:\\test\\mix_test\\inp\\test4.png", 5);
+    //flo::do_gui("D:\\test\\mix_test\\inp\\test4.png", 5);
+
+    std::vector<flo::rgb_color> pal = { {255,255,255}, {255,255,0}, {255,0,0} };
+    auto canv = flo::canvas(pal, 200, 200, 0, 1.0);
+    auto& mat = canv.cells();
+    for (int y = 0; y < 100; ++y) {
+        for (int x = 0; x < 100; ++x) {
+            mat[x, y] = flo::make_one_color_paint(3, 1, 1.0);
+        }
+    }
+    auto brush = flo::create_simple_brush(flo::make_one_color_paint(5, 2, 200.0), 5.0, 0.2, 0.3);
+    flo::do_gui(canv, brush);
 
     return 0;
 }

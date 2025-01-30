@@ -5,11 +5,6 @@ flo::paint_particle::paint_particle(double volume, const std::vector<double>& mi
 {
 }
 
-flo::paint_particle::paint_particle(double volume, int n) :
-    volume_(volume), mixture_(n, 0.0)
-{
-}
-
 double flo::paint_particle::volume() const
 {
     return volume_;

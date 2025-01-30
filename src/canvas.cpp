@@ -164,7 +164,7 @@ flo::image flo::canvas_to_image(const canvas& canv)
 }
 
 flo::paint_particle flo::all_paint_in_brush_region(canvas& canvas, const point& loc, double radius, int aa_level) {
-    flo::paint_particle sum(0.0, canvas.palette_size());
+    flo::paint_particle sum(0.0, std::vector<double>(canvas.palette_size(), 0.0));
     auto& canv = canvas.cells();
     for (const auto& [loc, paint_pcnt] : brush_region(canv.bounds(), loc, radius, aa_level)) {
         sum += paint_pcnt * canv[loc];

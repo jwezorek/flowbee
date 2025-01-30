@@ -15,7 +15,7 @@ namespace {
     flo::canvas g_canvas;
     HBITMAP g_hbm;
     bool g_is_dirty = true;
-    auto g_brush = flo::create_simple_brush(flo::make_one_color_paint(5, 2, 20000.0), 5.0, 0.75, 0.1);
+    flo::brush g_brush;
     bool g_stroke_in_progress = false;
 
     LRESULT handle_paint(HWND hwnd);
@@ -188,7 +188,13 @@ namespace {
 }
 
 void flo::do_gui(const std::string& img_file, int n) {
+    auto canvas = flo::image_to_canvas(flo::img_from_file(img_file), n);
+    auto brush = flo::create_simple_brush(flo::make_one_color_paint(5, 2, 20000.0), 5.0, 0.75, 0.1);
+    do_gui(canvas, brush);
+}
 
+void flo::do_gui( canvas& c, brush& b)
+{
     const char class_name[] = "flowbee_window_class";
     HINSTANCE h_instance = GetModuleHandle(NULL);
     WNDCLASS wc = {};
@@ -219,7 +225,8 @@ void flo::do_gui(const std::string& img_file, int n) {
         return;
     }
 
-    g_canvas = flo::image_to_canvas(flo::img_from_file(img_file), n);
+    g_canvas = c;
+    g_brush = b;
     auto dims = g_canvas.bounds();
     ResizeWindowToClientSize(hwnd, dims.wd, dims.hgt);
 
