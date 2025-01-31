@@ -35,7 +35,7 @@ namespace {
         auto canvas = flo::image_to_canvas(img, n);
         flo::mix(canvas, { x,y }, radius, 4);
 
-        flo::img_to_file( out_file, flo::canvas_to_image(canvas) );
+        flo::img_to_file( out_file, flo::canvas_to_image(canvas, 0.0) );
     }
 }
 
@@ -57,14 +57,19 @@ int main(int argc, char* argv[]) {
     //flo::do_gui("D:\\test\\mix_test\\inp\\test4.png", 5);
 
     std::vector<flo::rgb_color> pal = { {255,255,255}, {255,255,0}, {255,0,0} };
-    auto canv = flo::canvas(pal, 200, 200, 0, 1.0);
+    auto canv = flo::canvas(pal, 200, 200);
     auto& mat = canv.cells();
     for (int y = 0; y < 100; ++y) {
         for (int x = 0; x < 100; ++x) {
             mat[x, y] = flo::make_one_color_paint(3, 1, 1.0);
         }
     }
-    auto brush = flo::create_simple_brush(flo::make_one_color_paint(3, 2, 2000.0), 5.0, 0.002, 0.01);
+    auto brush = flo::create_absolute_brush(
+        5.0, // radius
+        flo::make_one_color_paint(3, 2, 1.0), // paint particle,
+        4, // aa_level
+        0.99 // l
+    );
     flo::do_gui(canv, brush);
 
     return 0;

@@ -8,33 +8,57 @@ namespace {
 
 }
 
-flo::brush flo::create_mixing_brush(double radius) {
+flo::brush flo::create_mixing_brush(double radius, int aa_level) {
 
-    return brush{
-        .radius = radius,
-        .paint = {},
-        .mix = true,
-        .from_brush_fn = {},
-        .from_canv_fn = {}
+    return flo::brush{
+        .params = {
+            .radius = radius,
+            .paint = {},
+            .mix = true,
+            .antialias = aa_level
+        },
+        .apply = {}
     };
 
 }
 
-flo::brush flo::create_simple_brush(
-    const paint_particle& p, double radius, double from_canvas, double from_brush) {
-    return brush{
-        .radius = radius,
-        .paint = p,
-        .mix = false,
-        .from_brush_fn = [from_brush](const paint_particle& p, double area, double t)->paint_particle {
-            return (t * from_brush * area) * normalize(p);
+flo::brush flo::create_absolute_brush(double radius, const paint_particle& pp, int aa_level, double k) {
+
+    return flo::brush{
+        .params = {
+            .radius = radius,
+            .paint = pp,
+            .mix = false,
+            .antialias = aa_level
         },
-        .from_canv_fn = [from_canvas](const paint_particle& p, double area, double t)->paint_particle {
-            return (t * from_canvas * area) * normalize(p);
+        .apply = [k](canvas& canv, brush_params& bp, const application_params& args) {
+            auto brush_rgn_area = brush_region_area(canv.bounds(), args.loc, bp.radius, bp.antialias);
+            auto paint_on_canvas = all_paint_in_brush_region(canv, args.loc, bp.radius, bp.antialias);
+            paint_on_canvas.normalize();
+            auto new_paint = (1.0 - k) * paint_on_canvas + k * bp.paint;
+            bp.paint = new_paint;
+            if (std::isnan(bp.paint.volume())) {
+                int aaa;
+                aaa = 5;
+                auto test = all_paint_in_brush_region(canv, args.loc, bp.radius, bp.antialias);
+            }
+            fill(canv, args.loc, bp.radius, bp.antialias, new_paint);
         }
     };
+
 }
 
+void flo::apply_brush(canvas& canv, brush& brush, const point& loc, double t) {
+    if (brush.params.mix) {
+        mix(canv, loc, brush.params.radius, brush.params.antialias);
+    }
+    if (!brush.apply) {
+        return;
+    }
+    brush.apply(canv, brush.params, { loc, t });
+}
+
+/*
 void flo::apply_brush(canvas& canv, brush& brush, const point& loc, double delta_t, int aa_level) {
 
     if (brush.mix) {
@@ -64,5 +88,4 @@ void flo::apply_brush(canvas& canv, brush& brush, const point& loc, double delta
     brush.paint += brush_delta;
     //brush.paint = clamp_nonnegative(brush.paint - paint_from_brush + paint_from_canvas);
 }
-
-
+*/

@@ -61,7 +61,7 @@ namespace {
     LRESULT handle_mouse_down(HWND hwnd, WPARAM w_param, LPARAM l_param) {
         g_is_dirty = true;
         g_stroke_in_progress = true;
-        flo::apply_brush(g_canvas, g_brush, to_point(l_param), 1.0, 4);
+        flo::apply_brush(g_canvas, g_brush, to_point(l_param), 1.0);
         InvalidateRect(hwnd, NULL, false);
         return 0;
     }
@@ -69,7 +69,7 @@ namespace {
     LRESULT handle_mouse_move(HWND hwnd, WPARAM w_param, LPARAM l_param) {
         if (g_stroke_in_progress) {
             g_is_dirty = true;
-            flo::apply_brush(g_canvas, g_brush, to_point(l_param), 1.0, 4);
+            flo::apply_brush(g_canvas, g_brush, to_point(l_param), 1.0);
             InvalidateRect(hwnd, NULL, false);
         }
         return 0;
@@ -165,7 +165,7 @@ namespace {
         HDC hdc = BeginPaint(hwnd, &ps);
         
         if (g_is_dirty) {
-            g_hbm = img_to_bmp(flo::canvas_to_image(g_canvas));
+            g_hbm = img_to_bmp(flo::canvas_to_image(g_canvas, 1.0));
         }
 
         HDC hdc_scr = GetDC(NULL);
@@ -189,7 +189,7 @@ namespace {
 
 void flo::do_gui(const std::string& img_file, int n) {
     auto canvas = flo::image_to_canvas(flo::img_from_file(img_file), n);
-    auto brush = flo::create_simple_brush(flo::make_one_color_paint(5, 2, 20000.0), 5.0, 0.75, 0.1);
+    auto brush = create_mixing_brush(5.0, 4);
     do_gui(canvas, brush);
 }
 

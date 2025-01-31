@@ -9,21 +9,28 @@
 
 namespace flo {
 
-    using mix_fn = std::function<paint_particle(const paint_particle&, double, double)>;
-
-    struct brush {
+    struct brush_params {
         double radius;
         paint_particle paint;
         bool mix;
-        mix_fn from_brush_fn;
-        mix_fn from_canv_fn;
+        int antialias;
     };
 
-    brush create_mixing_brush(double radius);
-    brush create_simple_brush(const paint_particle& p, double radius,
-        double from_canvas, double from_brush
-    );
+    struct application_params {
+        point loc;
+        double time;
+    };
 
-    void apply_brush(canvas& canv, brush& brush, const point& loc, double t, int antialias);
+    using brush_fn = std::function<void(canvas&, brush_params&, const application_params&)>;
+
+    struct brush {
+        brush_params params;
+        brush_fn apply;
+    };
+
+    brush create_mixing_brush(double radius, int aa_level);
+    brush create_absolute_brush(double radius, const paint_particle& pp, int aa_level, double k);
+
+    void apply_brush(canvas& canv, brush& brush, const point& loc, double t);
 
 }

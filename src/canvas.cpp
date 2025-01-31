@@ -61,7 +61,7 @@ flo::canvas::canvas(const std::vector<rgb_color>& palette, int wd, int hgt) :
         palette | rv::transform( to_pigment ) | r::to<std::vector>()
     },
     impl_{
-        wd, hgt, {1.0, std::vector<double>(palette.size(), 0.0)}
+        wd, hgt, {0.0, std::vector<double>(palette.size(), 0.0)}
     }
 {
 }
@@ -154,11 +154,22 @@ flo::canvas flo::image_to_canvas(const image& img, int n, double vol_per_pixel) 
     return canv;
 }
 
-flo::image flo::canvas_to_image(const canvas& canv)
-{
+flo::image flo::canvas_to_image(const canvas& canv, double alpha_threshold) {
+    static const auto white = rgb_to_pigment(255, 255, 255);
     flo::image img(canv.bounds());
-    for (auto [x,y] : locations(img.bounds())) {
-        img[x, y] = rgb_to_pixel(pigment_to_rgb(canv.color_at(x, y)));
+    for (auto [x, y] : locations(img.bounds())) {
+        auto pigment = canv.color_at(x, y);
+        auto volume = canv.cells()[x, y].volume();
+        if (alpha_threshold > 0.0) {
+            auto alpha = (volume >= alpha_threshold) ? 1.0 : volume / alpha_threshold;
+            if (std::isnan(alpha)) {
+                auto& test = canv.cells()[x, y];
+                int aaa;
+                aaa = 5;
+            }
+            pigment = mix_pigments(white, (1.0 - alpha), pigment, alpha);
+        }
+        img[x, y] = rgb_to_pixel(pigment_to_rgb(pigment));
     }
     return img;
 }

@@ -22,6 +22,7 @@ namespace flo {
         paint_particle(double volume = 0.0, const std::vector<double>& mixture = {});
         double volume() const;
         const std::vector<double>& mixture() const;
+        void normalize();
     };
 
     paint_particle operator*(double k, const paint_particle& paint);

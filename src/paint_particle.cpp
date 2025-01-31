@@ -6,6 +6,9 @@ namespace rv = std::ranges::views;
 namespace {
     void normalize(std::vector<double>& vec) {
         auto sum = r::fold_left(vec, 0.0, std::plus<>());
+        if (sum == 0.0) {
+            return;
+        }
         for (auto& v : vec) {
             v /= sum;
         }
@@ -35,6 +38,10 @@ double flo::paint_particle::volume() const
 const std::vector<double>& flo::paint_particle::mixture() const
 {
     return mixture_;
+}
+
+void flo::paint_particle::normalize() {
+    volume_ = 1.0;
 }
 
 
