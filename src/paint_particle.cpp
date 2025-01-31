@@ -41,7 +41,9 @@ const std::vector<double>& flo::paint_particle::mixture() const
 }
 
 void flo::paint_particle::normalize() {
-    volume_ = 1.0;
+    if (volume_ > 0.0) {
+        volume_ = 1.0;
+    }
 }
 
 

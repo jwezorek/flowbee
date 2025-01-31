@@ -35,13 +35,10 @@ flo::brush flo::create_absolute_brush(double radius, const paint_particle& pp, i
             auto brush_rgn_area = brush_region_area(canv.bounds(), args.loc, bp.radius, bp.antialias);
             auto paint_on_canvas = all_paint_in_brush_region(canv, args.loc, bp.radius, bp.antialias);
             paint_on_canvas.normalize();
-            auto new_paint = (1.0 - k) * paint_on_canvas + k * bp.paint;
+            auto new_paint = (paint_on_canvas.volume() > 0.0) ?
+                (1.0 - k) * paint_on_canvas + k * bp.paint :
+                bp.paint;
             bp.paint = new_paint;
-            if (std::isnan(bp.paint.volume())) {
-                int aaa;
-                aaa = 5;
-                auto test = all_paint_in_brush_region(canv, args.loc, bp.radius, bp.antialias);
-            }
             fill(canv, args.loc, bp.radius, bp.antialias, new_paint);
         }
     };

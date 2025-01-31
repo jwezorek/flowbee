@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
         5.0, // radius
         flo::make_one_color_paint(3, 2, 1.0), // paint particle,
         4, // aa_level
-        0.99 // l
+        0.6 // l
     );
     flo::do_gui(canv, brush);
 
