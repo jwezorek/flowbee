@@ -1,8 +1,8 @@
-#include "paint_particle.hpp"
+#include "pigment.hpp"
 #include <boost/functional/hash.hpp>
 #include <stdexcept>
-#include <cstring> // For memset
-#include <print>
+#include <print> 
+#include <format>
 #include <ranges>
 
 namespace r = std::ranges;
@@ -13,13 +13,6 @@ namespace rv = std::ranges::views;
 namespace {
     constexpr float k_eps = 0.000005f;
     constexpr float k_mult = 1.0f / k_eps;
-
-    void normalize(std::vector<double>& vec) {
-        auto sum = r::fold_left(vec, 0.0, std::plus<>());
-        for (auto& v : vec) {
-            v /= sum;
-        }
-    }
 }
 
 flo::pigment flo::rgb_to_pigment(uint8_t r, uint8_t g, uint8_t b) {
@@ -97,52 +90,6 @@ flo::pigment flo::mix_paint(const pigment_map<double>& pigments) {
     }
 
     return mixed_pigment;
-}
-
-flo::paint_particle flo::operator*(double k, const paint_particle& p) {
-    return { k * p.volume(), p.mixture() };
-}
-
-flo::paint_particle& flo::operator+=(flo::paint_particle& paint_lhs, const flo::paint_particle& paint_rhs) {
-    auto new_mixture = rv::zip(paint_lhs.mixture(), paint_rhs.mixture()) |
-        rv::transform(
-            [&](const auto& pair) {
-                const auto& [lhs, rhs] = pair;
-                return paint_lhs.volume() * lhs + paint_rhs.volume() * rhs;
-            }
-        ) | r::to<std::vector>();
-    ::normalize(new_mixture);
-    paint_lhs = paint_particle{
-        paint_lhs.volume() + paint_rhs.volume(),
-        new_mixture
-    };
-    return paint_lhs;
-}
-
-flo::paint_particle& flo::operator-=(paint_particle& lhs, const paint_particle& rhs) {
-    return lhs += (-1.0) * rhs;
-}
-
-flo::paint_particle flo::operator+(const paint_particle& lhs, const paint_particle& rhs) {
-    auto sum = lhs;
-    sum += rhs;
-    return sum;
-}
-
-flo::paint_particle flo::operator-(const paint_particle& lhs, const paint_particle& rhs) {
-    auto difference = lhs;
-    difference -= rhs;
-    return difference;
-}
-
-flo::paint_particle flo::normalize(const paint_particle& p) {
-    return { 1.0, p.mixture() };
-}
-
-flo::paint_particle flo::make_one_color_paint(int palette_sz, int color_index, double volume) {
-    auto mixture = std::vector<double>(palette_sz, 0.0);
-    mixture[color_index] = 1.0;
-    return { volume, mixture };
 }
 
 bool flo::pigment::operator==(const pigment& p) const {

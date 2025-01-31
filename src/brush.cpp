@@ -30,17 +30,9 @@ flo::brush flo::create_simple_brush(
             return (t * from_brush * area) * normalize(p);
         },
         .from_canv_fn = [from_canvas](const paint_particle& p, double area, double t)->paint_particle {
-            return (t * from_canvas) * normalize(p);
+            return (t * from_canvas * area) * normalize(p);
         }
     };
-}
-
-void test_canv(const flo::canvas& c) {
-    for (const auto& cell : c.cells().entries()) {
-        if (cell.mixture().size() == 0) {
-            std::println("bad");
-        }
-    }
 }
 
 void flo::apply_brush(canvas& canv, brush& brush, const point& loc, double delta_t, int aa_level) {
@@ -56,14 +48,20 @@ void flo::apply_brush(canvas& canv, brush& brush, const point& loc, double delta
     auto paint_on_canvas = all_paint_in_brush_region(canv, loc, brush.radius, aa_level);
     auto paint_from_canvas = brush.from_canv_fn(paint_on_canvas, brush_rgn_area, delta_t);
     auto paint_from_brush = brush.from_brush_fn(brush.paint, brush_rgn_area, delta_t);
-    auto canvas_delta = paint_on_canvas - paint_from_canvas + paint_from_brush;
+    auto canvas_delta = paint_from_brush - paint_from_canvas;
+    auto brush_delta = paint_from_canvas - paint_from_brush;
     auto canvas_delta_per_pixel = (1.0 / brush_rgn_area) * canvas_delta;
 
-    test_canv(canv);
+    std::println("curr brush : {}", display(brush.paint));
+    std::println("paint from canvas : {}", display(paint_from_canvas));
+    std::println("paint from brush : {}", display(paint_from_brush));
+    std::println("canvas delta : {}", display(canvas_delta));
+    std::println("brush delta : {}", display(brush_delta));
+    std::println("canvas delta per pixel : {}", display(canvas_delta_per_pixel));
+    std::println("");
+
     overlay(canv, loc, brush.radius, aa_level, canvas_delta_per_pixel);
-    test_canv(canv);
-
-
+    brush.paint += brush_delta;
     //brush.paint = clamp_nonnegative(brush.paint - paint_from_brush + paint_from_canvas);
 }
 

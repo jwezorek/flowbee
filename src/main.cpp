@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
             mat[x, y] = flo::make_one_color_paint(3, 1, 1.0);
         }
     }
-    auto brush = flo::create_simple_brush(flo::make_one_color_paint(5, 2, 200.0), 5.0, 0.2, 0.3);
+    auto brush = flo::create_simple_brush(flo::make_one_color_paint(3, 2, 2000.0), 5.0, 0.002, 0.01);
     flo::do_gui(canv, brush);
 
     return 0;
