@@ -2,6 +2,7 @@
 
 #include "types.hpp"
 #include <string>
+#include <span>
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -15,6 +16,12 @@ namespace flo {
     image to_gray_scale_image(const scalar_field& sf, bool invert = false);
     scalar_field white_noise(int wd, int hgt);
     scalar_field perlin_noise(const flo::dimensions& sz, uint32_t seed, int octaves, double freq);
-    vector_field perlin_vector_field(const flo::dimensions& sz, uint32_t seed1, uint32_t seed2, int octaves, double freq);
+    vector_field perlin_vector_field(const flo::dimensions& sz, uint32_t seed1, uint32_t seed2, int octaves, double freq, 
+        bool normalized);
+    point vector_from_field(const vector_field& vf, const point& pt);
     rgb_color random_rgb_color();
+    int rand_number(int min, int max);
+    double uniform_rand(double low = 0.0, double high = 1.0);
+    bool in_bounds(const point& p, const dimensions& dim);
+    dimensions convex_hull_bounds(std::span<point> pts);
 }

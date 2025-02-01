@@ -66,6 +66,11 @@ flo::canvas::canvas(const std::vector<rgb_color>& palette, int wd, int hgt) :
 {
 }
 
+flo::canvas::canvas(const std::vector<rgb_color>& palette, const dimensions& dim) :
+    canvas(palette, dim.wd, dim.hgt)
+{
+}
+
 flo::canvas::canvas( const std::vector<rgb_color>& palette, int wd, int hgt, int bkgd, double amnt) :
         canvas(palette, wd, hgt) {
     for (int y = 0; y < hgt; ++y) {

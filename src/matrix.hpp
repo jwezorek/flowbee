@@ -15,12 +15,10 @@ namespace flo {
     struct dimensions {
         int wd;
         int hgt;
-        int depth;
 
-        dimensions(int w, int h, int d = 1) {
+        dimensions(int w, int h) {
             wd = w;
             hgt = h;
-            depth = d;
         }
     };
 
@@ -110,5 +108,50 @@ namespace flo {
             return { cols_, rows_ };
         }
     };
+
+    template<typename T>
+    matrix<T> operator+(const matrix<T>& lhs, T rhs) {
+        auto sum = lhs;
+        for (auto [x, y] : locations(lhs.bounds())) {
+            sum[x, y] = lhs[x, y] + rhs;
+        }
+        return sum;
+    }
+
+    template<typename T>
+    matrix<T> operator-(const matrix<T>& lhs, T rhs) {
+        auto diff = lhs;
+        for (auto [x, y] : locations(lhs.bounds())) {
+            diff[x, y] = lhs[x, y] - rhs;
+        }
+        return diff;
+    }
+
+    template<typename T>
+    matrix<T> operator+(const matrix<T>& lhs, const matrix<T>& rhs) {
+        auto sum = lhs;
+        for (auto [x, y] : locations(lhs.bounds())) {
+            sum[x, y] = lhs[x, y] + rhs[x, y];
+        }
+        return sum;
+    }
+
+    template<typename T>
+    matrix<T> operator-(const matrix<T>& lhs, const matrix<T>& rhs) {
+        auto diff = lhs;
+        for (auto [x, y] : locations(lhs.bounds())) {
+            diff[x, y] = lhs[x, y] - rhs[x, y];
+        }
+        return diff;
+    }
+
+    template<typename T>
+    matrix<T> operator*(T lhs, const matrix<T>& rhs) {
+        auto prod = rhs;
+        for (auto [x, y] : locations(rhs.bounds())) {
+            prod[x, y] = lhs * rhs[x, y];
+        }
+        return prod;
+    }
 
 }

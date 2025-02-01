@@ -1,3 +1,9 @@
+
+#include "util.hpp"
+#include "paint_particle.hpp"
+#include "canvas.hpp"
+#include "brush.hpp"
+#include "gui.hpp"
 #include <iostream>
 #include <vector>
 #include <functional>
@@ -6,11 +12,7 @@
 #include <ranges>
 #include <unordered_map>
 #include <format>
-#include "util.hpp"
-#include "paint_particle.hpp"
-#include "canvas.hpp"
-#include "brush.hpp"
-#include "gui.hpp"
+#include <deque>
 
 namespace r = std::ranges;
 namespace rv = std::ranges::views;
@@ -19,23 +21,91 @@ namespace rv = std::ranges::views;
 
 namespace {
 
-    void write_color_image(const flo::rgb_color& color, const std::string& out_file) {
-        flo::image img(100, 100, flo::rgb_to_pixel(color));
-        flo::img_to_file(out_file, img);
+    struct particle {
+        flo::brush brush;
+        std::deque<flo::point> history;
+    };
+
+    particle random_particle(int num_colors, const flo::dimensions& dim) {
+        particle p = {
+            flo::create_absolute_brush(
+                5.0,
+                flo::make_one_color_paint(
+                    num_colors, flo::rand_number(0,num_colors - 1), 1.0
+                ),
+                4,
+                0.6
+            ),
+            {}
+        };
+        p.history.push_back(
+            flo::point{
+                flo::uniform_rand(0, dim.wd - 1),
+                flo::uniform_rand(0, dim.hgt - 1)
+            }
+        );
+        return p;
     }
 
-    void test_mix(const std::string& inp, int n, const std::string& out_file) {
-        auto img = flo::img_from_file(inp);
-        auto dim = img.bounds();
+    void basic_flowbee(const std::string& out_path, const flo::vector_field& flow,
+            const std::vector<flo::rgb_color>& palette, double delta_t, int iterations,
+            int n) {
+        auto dim = flow.x.bounds();
+        flo::canvas canvas(palette, dim);
 
-        double radius = 3.0 * dim.wd / 8.0;
-        double x = dim.wd / 2.0;
-        double y = dim.hgt / 2.0;
+        
 
-        auto canvas = flo::image_to_canvas(img, n);
-        flo::mix(canvas, { x,y }, radius, 4);
+        int num_colors = static_cast<int>(palette.size());
+        std::vector<particle> particles = rv::iota(0, n) | rv::transform(
+            [&](auto)->particle {
+                return random_particle(num_colors, dim);
+            }
+        ) | r::to<std::vector>();
 
-        flo::img_to_file( out_file, flo::canvas_to_image(canvas, 0.0) );
+        for (int i = 0; i < iterations; ++i) {
+            if (i % 100 == 0) {
+                std::println("{} {}", i, particles.size());
+            }
+
+            for (auto& p : particles) {
+                auto loc = p.history.back();
+
+                flo::apply_brush(canvas, p.brush, loc, delta_t);
+                flo::point velocity = vector_from_field(flow, loc);
+                loc = loc + delta_t * velocity;
+                p.history.push_back(loc);
+                if (p.history.size() > 10) {
+                    p.history.pop_front();
+                }
+            }
+
+            particles = particles | rv::filter(
+                [&](const auto& p) {
+                    if (!flo::in_bounds(p.history.back(), dim)) {
+                        return false;
+                    }
+                    if (p.history.size() == 10) {
+                        auto points = p.history | r::to<std::vector>();
+                        auto hull_dim = flo::convex_hull_bounds(points);
+                        if (hull_dim.wd < 3.0 && hull_dim.hgt < 3.0) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            ) | r::to<std::vector>();
+
+            if (particles.size() < n) {
+                for (int i = 0; i < n - particles.size(); ++i) {
+                    particles.push_back(random_particle(num_colors, dim));
+                }
+            }
+        }
+
+        flo::img_to_file(
+            out_path,
+            flo::canvas_to_image(canvas, 1.0)
+        );
     }
 }
 
@@ -45,32 +115,42 @@ int main(int argc, char* argv[]) {
     std::println("flowbee...");
 
     /*
-    std::vector<int> colors = { 3,4,3,5,3 };
-    for (int i = 1; i <= 5; ++i) {
-        auto inp = std::format("D:\\test\\mix_test\\inp\\test{}.png", i);
-        auto outp = std::format("D:\\test\\mix_test\\outp\\mix{}.png", i);
-        test_mix(inp, colors[i-1], outp);
-    }
-    */
-
-    //flo::do_gui("D:\\test\\test.png", 6);
-    //flo::do_gui("D:\\test\\mix_test\\inp\\test4.png", 5);
-
-    std::vector<flo::rgb_color> pal = { {255,255,255}, {255,255,0}, {255,0,0} };
+    std::vector<flo::rgb_color> pal = { {255,255,255}, {255,255,0}, {255,0,0}, {0,0,255} };
     auto canv = flo::canvas(pal, 200, 200);
     auto& mat = canv.cells();
     for (int y = 0; y < 100; ++y) {
         for (int x = 0; x < 100; ++x) {
-            mat[x, y] = flo::make_one_color_paint(3, 1, 1.0);
+            mat[x, y] = flo::make_one_color_paint(4, 1, 1.0);
+            mat[x+100, y] = flo::make_one_color_paint(4, 3, 1.0);
         }
     }
     auto brush = flo::create_absolute_brush(
         5.0, // radius
-        flo::make_one_color_paint(3, 2, 1.0), // paint particle,
+        flo::make_one_color_paint(4, 2, 1.0), // paint particle,
         4, // aa_level
-        0.6 // l
+        0.9 // l
     );
     flo::do_gui(canv, brush);
+    */
+
+    std::vector<flo::rgb_color> palette = {
+        {255, 189, 67 },
+        {32,  133, 130},
+        {72,  72,  152},
+        {174, 181, 219},
+        { 137, 132, 132}
+    };
+
+    auto flow = flo::perlin_vector_field({ 800,800 }, 123456, 42137, 2, 4.0, true);
+
+    basic_flowbee(
+        "D:\\test\\flowbee.png",
+        flow,
+        palette,
+        1.0,
+        10000,
+        200
+    );
 
     return 0;
 }

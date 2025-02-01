@@ -13,6 +13,7 @@ namespace flo {
     public:
         canvas() {}
         canvas(const std::vector<rgb_color>& palette, int wd, int hgt);
+        canvas(const std::vector<rgb_color>& palette, const dimensions& dim);
         canvas(const std::vector<rgb_color>& palette, int wd, int hgt, int bkgd, double amnt);
 
         matrix<paint_particle>& cells();
