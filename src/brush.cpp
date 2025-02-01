@@ -39,7 +39,7 @@ flo::brush flo::create_absolute_brush(double radius, const paint_particle& pp, i
                 (1.0 - k) * paint_on_canvas + k * bp.paint :
                 bp.paint;
             bp.paint = new_paint;
-            fill(canv, args.loc, bp.radius, bp.antialias, new_paint);
+            overlay(canv, args.loc, bp.radius, bp.antialias, new_paint);
         }
     };
 

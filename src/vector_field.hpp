@@ -15,9 +15,18 @@ namespace flo {
     vector_field normalize(const vector_field& vf);
     point vector_from_field(const vector_field& vf, const point& pt);
 
+    enum class circle_field_type {
+        inward,
+        outward,
+        clockwise,
+        counterclockwise
+    };
+
+    vector_field circular_vector_field(const dimensions& dim, circle_field_type type);
     vector_field operator*(const point& v, const vector_field& field);
     vector_field operator*(double k, const vector_field& field);
     vector_field operator+(const point& v, const vector_field& field);
     vector_field operator+(double k, const vector_field& field);
+    vector_field operator+(const vector_field& lhs, const vector_field& rhs);
     scalar_field pow(const scalar_field& field, double exp);
 }

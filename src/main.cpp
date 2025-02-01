@@ -36,7 +36,7 @@ namespace {
                     num_colors, flo::rand_number(0,num_colors - 1), 1.0
                 ),
                 4,
-                0.6
+                0.9 //0.6
             ),
             {}
         };
@@ -76,7 +76,7 @@ namespace {
                 flo::point velocity = vector_from_field(flow, loc);
                 loc = loc + delta_t * velocity;
                 p.history.push_back(loc);
-                if (p.history.size() > 10) {
+                if (p.history.size() > 20) {
                     p.history.pop_front();
                 }
             }
@@ -86,7 +86,7 @@ namespace {
                     if (!flo::in_bounds(p.history.back(), dim)) {
                         return false;
                     }
-                    if (p.history.size() == 10) {
+                    if (p.history.size() == 20) {
                         auto points = p.history | r::to<std::vector>();
                         auto hull_dim = flo::convex_hull_bounds(points);
                         if (hull_dim.wd < 3.0 && hull_dim.hgt < 3.0) {
@@ -97,10 +97,8 @@ namespace {
                 }
             ) | r::to<std::vector>();
 
-            if (particles.size() < n) {
-                for (int i = 0; i < n - particles.size(); ++i) {
-                    particles.push_back(random_particle(num_colors, dim));
-                }
+            while (particles.size() < n) {
+                particles.push_back(random_particle(num_colors, dim));
             }
         }
 
@@ -153,20 +151,29 @@ int main(int argc, char* argv[]) {
     };
     */
 
-    auto x_comp = flo::pow(flo::perlin_noise({ 800, 800 }, 73652, 8, 8.0), 1.5);
-    auto y_comp = flo::pow(flo::perlin_noise({ 800, 800 }, 47564, 8, 8.0), 1.5);
+    /*
+    auto x_comp = flo::pow(flo::perlin_noise({ 800, 800 }, 736152, 8, 8.0), 0.5);
+    auto y_comp = flo::pow(flo::perlin_noise({ 800, 800 }, 147564, 8, 8.0), 0.5);
     auto flow = flo::vector_field_from_scalar_fields(x_comp, y_comp);
     auto theta = std::numbers::pi / 3.0;
     flow = flo::normalize(
-        flo::point{ 0.005 * std::cos(theta), 0.005 * std::sin(theta) } + flow
+        flo::point{ 0.25 * std::cos(theta), 0.25 * std::sin(theta) } + flow
     );
+    */
+
+    auto x_comp = flo::pow(flo::perlin_noise({ 1000, 1000 }, 5246524, 8, 8.0), 0.5);
+    auto y_comp = flo::pow(flo::perlin_noise({ 1000, 1000 }, 107374, 8, 8.0), 0.5);
+    auto flow = flo::vector_field_from_scalar_fields(x_comp, y_comp);
+    auto circle = flo::circular_vector_field({ 1000, 1000 }, flo::circle_field_type::clockwise);
+    flow = flo::normalize( 0.5 * flow + circle);
+
 
     basic_flowbee(
-        "D:\\test\\flowbee4.png",
+        "D:\\test\\flowbee_12.png",
         flow,
         palette,
         1.0,
-        10000,
+        40000,
         200
     );
 

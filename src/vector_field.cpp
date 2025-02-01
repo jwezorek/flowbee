@@ -24,6 +24,15 @@ namespace {
 
         return { x_comp, y_comp };
     }
+
+    flo::point rotate_90(const flo::point& p, bool clockwise) {
+        if (clockwise) {
+            return { p.y, -p.x };  // 90° clockwise
+        }
+        else {
+            return { -p.y, p.x };  // 90° counterclockwise
+        }
+    }
 }
 
 flo::vector_field flo::perlin_vector_field(
@@ -42,7 +51,13 @@ flo::vector_field flo::perlin_vector_field(
 
 flo::vector_field flo::vector_field_from_scalar_fields(
         const scalar_field& x, const scalar_field& y){
-    return normalize(vector_field(x,y));
+
+    auto x_comp = 2.0 * x - 1.0;
+    auto y_comp = 2.0 * y - 1.0;
+
+    return normalize(
+        vector_field(x_comp, y_comp)
+    );
 }
 
 flo::vector_field flo::normalize(const vector_field& vf) {
@@ -91,6 +106,42 @@ flo::point flo::vector_from_field(const vector_field& vf, const point& pt) {
     return point{ interpolated_x, interpolated_y };
 }
 
+flo::vector_field flo::circular_vector_field(const dimensions& dim, circle_field_type type) {
+    scalar_field x_comp(dim);
+    scalar_field y_comp(dim);
+    auto o_x = static_cast<double>(dim.wd) / 2.0;
+    auto o_y = static_cast<double>(dim.hgt) / 2.0;
+
+    for (auto [x, y] : locations(dim)) {
+        auto outward_x = x - o_x;
+        auto outward_y = y - o_y;
+        auto hypot = std::hypot(outward_x, outward_y);
+        auto outward = (1.0 / hypot) * flo::point{ outward_x, outward_y };
+        point vec;
+        switch (type) {
+            case circle_field_type::outward:
+                vec = outward;
+                break;
+            case circle_field_type::inward:
+                vec = -1.0 * outward;
+                break;
+            case circle_field_type::clockwise:
+                vec = rotate_90(outward, true);
+                break;
+            case circle_field_type::counterclockwise:
+                vec = rotate_90(outward, false);
+                break;
+        }
+        x_comp[x, y] = vec.x;
+        y_comp[x, y] = vec.y;
+    }
+
+    return {
+        x_comp,
+        y_comp
+    };
+}
+
 flo::vector_field flo::operator*(const point& v, const vector_field& field) {
     return {
         v.x * field.x,
@@ -120,6 +171,13 @@ flo::vector_field flo::operator+(double k, const flo::vector_field& field) {
     return {
         field.x.transform_to(adder),
         field.y.transform_to(adder)
+    };
+}
+
+flo::vector_field flo::operator+(const vector_field& lhs, const vector_field& rhs) {
+    return {
+        lhs.x + rhs.x,
+        lhs.y + rhs.y
     };
 }
 
