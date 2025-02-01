@@ -20,6 +20,7 @@ add_executable(flowbee
     src/gui.cpp
     src/canvas.cpp
     src/pigment.cpp
+    src/vector_field.cpp
 )
 
 target_link_libraries(flowbee PRIVATE Eigen3::Eigen)

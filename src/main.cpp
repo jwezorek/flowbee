@@ -1,5 +1,6 @@
 
 #include "util.hpp"
+#include "vector_field.hpp"
 #include "paint_particle.hpp"
 #include "canvas.hpp"
 #include "brush.hpp"
@@ -13,6 +14,7 @@
 #include <unordered_map>
 #include <format>
 #include <deque>
+#include <numbers>
 
 namespace r = std::ranges;
 namespace rv = std::ranges::views;
@@ -134,17 +136,33 @@ int main(int argc, char* argv[]) {
     */
 
     std::vector<flo::rgb_color> palette = {
+        {21,  36,  95 },
+        {249, 255, 174},
+        {255, 253, 118},
+        {255, 197, 72 },
+        {219, 63,  63 }
+    };
+
+    /*
+    std::vector<flo::rgb_color> palette = {
         {255, 189, 67 },
         {32,  133, 130},
         {72,  72,  152},
         {174, 181, 219},
         { 137, 132, 132}
     };
+    */
 
-    auto flow = flo::perlin_vector_field({ 800,800 }, 123456, 42137, 2, 4.0, true);
+    auto x_comp = flo::pow(flo::perlin_noise({ 800, 800 }, 73652, 8, 8.0), 1.5);
+    auto y_comp = flo::pow(flo::perlin_noise({ 800, 800 }, 47564, 8, 8.0), 1.5);
+    auto flow = flo::vector_field_from_scalar_fields(x_comp, y_comp);
+    auto theta = std::numbers::pi / 3.0;
+    flow = flo::normalize(
+        flo::point{ 0.005 * std::cos(theta), 0.005 * std::sin(theta) } + flow
+    );
 
     basic_flowbee(
-        "D:\\test\\flowbee.png",
+        "D:\\test\\flowbee4.png",
         flow,
         palette,
         1.0,
