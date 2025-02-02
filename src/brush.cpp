@@ -114,8 +114,10 @@ void flo::brush::apply(canvas& canv, const point& loc, const elapsed_time& t) {
 
     if (params_.mode == paint_mode::overlay) {
         overlay(canv, loc, params_.radius, params_.aa_level, paint_);
-    } else {
+    } else if (params_.mode == paint_mode::fill) {
         fill(canv, loc, params_.radius, params_.aa_level, paint_);
+    } else {
+        mix(canv, loc, params_.radius, params_.aa_level);
     }
     
 }

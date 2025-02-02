@@ -45,7 +45,8 @@ namespace flo {
 
     enum class paint_mode {
         overlay,
-        fill
+        fill,
+        mix
     };
 
     struct brush_params {
