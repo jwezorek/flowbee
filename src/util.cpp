@@ -154,6 +154,11 @@ bool flo::in_bounds(const point& p, const dimensions& dim) {
         p.y >= 0.0 && p.y < static_cast<double>(dim.hgt);
 }
 
+
+bool flo::in_bounds(const coords& p, const dimensions& dim) {
+    return p.x >= 0 && p.x < dim.wd && p.y >= 0 && p.y < dim.hgt;
+}
+
 flo::dimensions flo::convex_hull_bounds(std::span<point> pts)
 {
     if (pts.empty()) return dimensions{ 0, 0 };
@@ -172,4 +177,8 @@ flo::dimensions flo::convex_hull_bounds(std::span<point> pts)
     int height = static_cast<int>(std::ceil(max_y - min_y));
 
     return dimensions{ width, height };
+}
+
+flo::coords flo::to_coords(const point& pt) {
+    return { static_cast<int>(pt.x), static_cast<int>(pt.y) };
 }

@@ -42,7 +42,8 @@ namespace {
         );
     }
 
-    int find_closest_color(const flo::rgb_color& color, const std::vector<flo::rgb_color>& palette) {
+    int find_closest_color(
+            const flo::rgb_color& color, const std::vector<flo::rgb_color>& palette) {
         int closest = -1;
         double closest_dist = std::numeric_limits<double>::max();
         for (auto [index, pal_col] : rv::enumerate(palette)) {
@@ -121,7 +122,7 @@ int flo::canvas::palette_size() const {
 
 double flo::brush_region_area(const dimensions& dim, const point& loc, double rad, int aa) {
     return r::fold_left(
-        flo::brush_region(dim, loc, rad, aa) | rv::values,
+        flo::brush_region(dim, loc, rad, aa) | rv::transform([](auto&& rp) {return rp.weight; }),
         0.0,
         std::plus<double>()
     );

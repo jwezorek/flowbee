@@ -20,7 +20,9 @@ namespace flo {
     int rand_number(int min, int max);
     double uniform_rand(double low = 0.0, double high = 1.0);
     bool in_bounds(const point& p, const dimensions& dim);
+    bool in_bounds(const coords& p, const dimensions& dim);
     dimensions convex_hull_bounds(std::span<point> pts);
+    coords to_coords(const point& pt);
 
     template <typename T> int sgn(T val) {
         return (T(0) < val) - (val < T(0));

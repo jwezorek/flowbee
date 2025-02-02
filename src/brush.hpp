@@ -1,9 +1,12 @@
 #pragma once
 
 #include <functional>
+#include <ranges>
 #include "types.hpp"
 #include "canvas.hpp"
 #include "paint_particle.hpp"
+#include "util.hpp"
+#include <print>
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -33,4 +36,62 @@ namespace flo {
 
     void apply_brush(canvas& canv, brush& brush, const point& loc, double t);
 
+    struct region_pixel {
+        coords loc;
+        double weight;
+    };
+
+    namespace detail {
+
+        struct memo_key {
+            int x;
+            int y;
+            int r;
+            int aa_level;
+
+            memo_key(flo::point loc, double radius, int aa);
+            bool operator==(const memo_key& other) const;
+        };
+
+        struct memo_key_hash {
+            size_t operator()(const memo_key& key) const;
+        };
+
+        using memoization_tbl =
+            std::unordered_map<memo_key, std::vector<flo::region_pixel>, memo_key_hash>;
+
+        std::vector<flo::region_pixel> brush_region_aux(
+            const flo::point& brush_loc,
+            double brush_radius,
+            int anti_aliasing_level);
+    
+    }
+
+    inline auto brush_region(const flo::dimensions& dim,
+            const flo::point& loc,
+            double brush_radius,
+            int aa_level) {
+
+        namespace r = std::ranges;
+        namespace rv = std::ranges::views;
+
+        static detail::memoization_tbl memos;
+        point int_loc = { std::floor(loc.x), std::floor(loc.y) };
+        point unit_square_loc = loc - int_loc;
+        auto key = detail::memo_key(int_loc, brush_radius, aa_level);
+
+        if (!memos.contains(key)) {
+            memos[key] = detail::brush_region_aux(unit_square_loc, brush_radius, aa_level);
+        }
+
+        return memos.at(key) | rv::transform(
+            [int_loc](auto&& rp)->flo::region_pixel {
+                return { to_coords(int_loc) + rp.loc, rp.weight };
+            }
+        ) | rv::filter(
+            [dim](const flo::region_pixel& rp) {
+                return in_bounds(rp.loc, dim);
+            }
+        );
+    }
 }

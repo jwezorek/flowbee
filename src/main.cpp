@@ -36,7 +36,7 @@ namespace {
                     num_colors, flo::rand_number(0,num_colors - 1), 1.0
                 ),
                 4,
-                0.9 //0.6
+                0.7
             ),
             {}
         };
@@ -55,8 +55,7 @@ namespace {
         auto dim = flow.x.bounds();
         flo::canvas canvas(palette, dim);
 
-        
-
+     
         int num_colors = static_cast<int>(palette.size());
         std::vector<particle> particles = rv::iota(0, n) | rv::transform(
             [&](auto)->particle {
@@ -114,24 +113,6 @@ int main(int argc, char* argv[]) {
 
     std::println("flowbee...");
 
-    /*
-    std::vector<flo::rgb_color> pal = { {255,255,255}, {255,255,0}, {255,0,0}, {0,0,255} };
-    auto canv = flo::canvas(pal, 200, 200);
-    auto& mat = canv.cells();
-    for (int y = 0; y < 100; ++y) {
-        for (int x = 0; x < 100; ++x) {
-            mat[x, y] = flo::make_one_color_paint(4, 1, 1.0);
-            mat[x+100, y] = flo::make_one_color_paint(4, 3, 1.0);
-        }
-    }
-    auto brush = flo::create_absolute_brush(
-        5.0, // radius
-        flo::make_one_color_paint(4, 2, 1.0), // paint particle,
-        4, // aa_level
-        0.9 // l
-    );
-    flo::do_gui(canv, brush);
-    */
 
     std::vector<flo::rgb_color> palette = {
         {21,  36,  95 },
@@ -151,16 +132,6 @@ int main(int argc, char* argv[]) {
     };
     */
 
-    /*
-    auto x_comp = flo::pow(flo::perlin_noise({ 800, 800 }, 736152, 8, 8.0), 0.5);
-    auto y_comp = flo::pow(flo::perlin_noise({ 800, 800 }, 147564, 8, 8.0), 0.5);
-    auto flow = flo::vector_field_from_scalar_fields(x_comp, y_comp);
-    auto theta = std::numbers::pi / 3.0;
-    flow = flo::normalize(
-        flo::point{ 0.25 * std::cos(theta), 0.25 * std::sin(theta) } + flow
-    );
-    */
-
     auto x_comp = flo::pow(flo::perlin_noise({ 1000, 1000 }, 5246524, 8, 8.0), 0.5);
     auto y_comp = flo::pow(flo::perlin_noise({ 1000, 1000 }, 107374, 8, 8.0), 0.5);
     auto flow = flo::vector_field_from_scalar_fields(x_comp, y_comp);
@@ -169,11 +140,11 @@ int main(int argc, char* argv[]) {
 
 
     basic_flowbee(
-        "D:\\test\\flowbee_12.png",
+        "D:\\test\\flowbee_1000x1000_memo.png",
         flow,
         palette,
         1.0,
-        40000,
+        4000,
         200
     );
 

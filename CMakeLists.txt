@@ -24,4 +24,4 @@ add_executable(flowbee
 )
 
 target_link_libraries(flowbee PRIVATE Eigen3::Eigen)
-
+set_target_properties(${BUILD_TARGET} PROPERTIES LINK_FLAGS "/PROFILE")
