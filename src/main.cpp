@@ -4,7 +4,6 @@
 #include "paint_particle.hpp"
 #include "canvas.hpp"
 #include "brush.hpp"
-#include "gui.hpp"
 #include <iostream>
 #include <vector>
 #include <functional>
@@ -30,13 +29,17 @@ namespace {
 
     particle random_particle(int num_colors, const flo::dimensions& dim) {
         particle p = {
-            flo::create_absolute_brush(
-                5.0,
+            flo::brush(
+                flo::brush_params{
+                    .radius = 5.0,
+                    .mix = true,
+                    .mode = flo::paint_mode::fill,
+                    .aa_level = 4,
+                    .paint_transfer_coeff = 0.7
+                },
                 flo::make_one_color_paint(
                     num_colors, flo::rand_number(0,num_colors - 1), 1.0
-                ),
-                4,
-                0.7
+                )
             ),
             {}
         };
@@ -54,7 +57,6 @@ namespace {
             int n) {
         auto dim = flow.x.bounds();
         flo::canvas canvas(palette, dim);
-
      
         int num_colors = static_cast<int>(palette.size());
         std::vector<particle> particles = rv::iota(0, n) | rv::transform(
@@ -63,6 +65,7 @@ namespace {
             }
         ) | r::to<std::vector>();
 
+        double elapsed = 0;
         for (int i = 0; i < iterations; ++i) {
             if (i % 100 == 0) {
                 std::println("{} {}", i, particles.size());
@@ -71,7 +74,7 @@ namespace {
             for (auto& p : particles) {
                 auto loc = p.history.back();
 
-                flo::apply_brush(canvas, p.brush, loc, delta_t);
+                p.brush.apply(canvas, loc, { delta_t, elapsed });
                 flo::point velocity = vector_from_field(flow, loc);
                 loc = loc + delta_t * velocity;
                 p.history.push_back(loc);
@@ -99,6 +102,8 @@ namespace {
             while (particles.size() < n) {
                 particles.push_back(random_particle(num_colors, dim));
             }
+
+            elapsed += delta_t;
         }
 
         flo::img_to_file(
@@ -132,19 +137,19 @@ int main(int argc, char* argv[]) {
     };
     */
 
-    auto x_comp = flo::pow(flo::perlin_noise({ 1000, 1000 }, 5246524, 8, 8.0), 0.5);
-    auto y_comp = flo::pow(flo::perlin_noise({ 1000, 1000 }, 107374, 8, 8.0), 0.5);
+    auto x_comp = flo::pow(flo::perlin_noise({ 1000, 1000 }, 724164, 8, 8.0), 0.5);
+    auto y_comp = flo::pow(flo::perlin_noise({ 1000, 1000 }, 362474, 8, 8.0), 0.5);
     auto flow = flo::vector_field_from_scalar_fields(x_comp, y_comp);
     auto circle = flo::circular_vector_field({ 1000, 1000 }, flo::circle_field_type::clockwise);
     flow = flo::normalize( 0.5 * flow + circle);
 
 
     basic_flowbee(
-        "D:\\test\\flowbee_1000x1000_memo.png",
+        "D:\\test\\flow1.png",
         flow,
         palette,
         1.0,
-        4000,
+        12000,
         200
     );
 

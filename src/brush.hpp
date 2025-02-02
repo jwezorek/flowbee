@@ -12,30 +12,6 @@
 
 namespace flo {
 
-    struct brush_params {
-        double radius;
-        paint_particle paint;
-        bool mix;
-        int antialias;
-    };
-
-    struct application_params {
-        point loc;
-        double time;
-    };
-
-    using brush_fn = std::function<void(canvas&, brush_params&, const application_params&)>;
-
-    struct brush {
-        brush_params params;
-        brush_fn apply;
-    };
-
-    brush create_mixing_brush(double radius, int aa_level);
-    brush create_absolute_brush(double radius, const paint_particle& pp, int aa_level, double k);
-
-    void apply_brush(canvas& canv, brush& brush, const point& loc, double t);
-
     struct region_pixel {
         coords loc;
         double weight;
@@ -64,8 +40,42 @@ namespace flo {
             const flo::point& brush_loc,
             double brush_radius,
             int anti_aliasing_level);
-    
+
     }
+
+    enum class paint_mode {
+        overlay,
+        fill
+    };
+
+    struct brush_params {
+        double radius;
+        bool mix;
+        paint_mode mode;
+        int aa_level;
+        double paint_transfer_coeff;
+    };
+
+    struct application_params {
+        point loc;
+        double time;
+    };
+
+    using brush_fn = std::function<void(canvas&, brush_params&, const application_params&)>;
+
+    struct elapsed_time {
+        double delta_t;
+        double elapsed;
+    };
+
+    class brush {
+        brush_params params_;
+        paint_particle paint_;
+    public:
+        brush() {}
+        brush(const brush_params& params, const paint_particle& p);
+        void apply(canvas& canv, const point& loc, const elapsed_time& t);
+    };
 
     inline auto brush_region(const flo::dimensions& dim,
             const flo::point& loc,

@@ -17,7 +17,6 @@ add_executable(flowbee
     src/util.cpp
     src/paint_particle.cpp 
     src/brush.cpp
-    src/gui.cpp
     src/canvas.cpp
     src/pigment.cpp
     src/vector_field.cpp

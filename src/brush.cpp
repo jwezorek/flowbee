@@ -17,56 +17,6 @@ namespace {
 
 }
 
-flo::brush flo::create_mixing_brush(double radius, int aa_level) {
-
-    return flo::brush{
-        .params = {
-            .radius = radius,
-            .paint = {},
-            .mix = true,
-            .antialias = aa_level
-        },
-        .apply = {}
-    };
-
-}
-
-flo::brush flo::create_absolute_brush(
-        double radius, const paint_particle& pp, int aa_level, double k) {
-
-    return flo::brush{
-        .params = {
-            .radius = radius,
-            .paint = pp,
-            .mix = false,
-            .antialias = aa_level
-        },
-        .apply = [k](canvas& canv, brush_params& bp, const application_params& args) {
-            auto brush_rgn_area = 
-                brush_region_area(canv.bounds(), args.loc, bp.radius, bp.antialias);
-            auto paint_on_canvas = 
-                all_paint_in_brush_region(canv, args.loc, bp.radius, bp.antialias);
-            paint_on_canvas.normalize();
-            auto new_paint = (paint_on_canvas.volume() > 0.0) ?
-                (1.0 - k) * paint_on_canvas + k * bp.paint :
-                bp.paint;
-            bp.paint = new_paint;
-            fill(canv, args.loc, bp.radius, bp.antialias, new_paint);
-        }
-    };
-
-}
-
-void flo::apply_brush(canvas& canv, brush& brush, const point& loc, double t) {
-    if (brush.params.mix) {
-        mix(canv, loc, brush.params.radius, brush.params.antialias);
-    }
-    if (!brush.apply) {
-        return;
-    }
-    brush.apply(canv, brush.params, { loc, t });
-}
-
 flo::detail::memo_key::memo_key(flo::point loc, double radius, int aa) {
     x = static_cast<int>(std::round(loc.x * k_fixed_point_scale));
     y = static_cast<int>(std::round(loc.y * k_fixed_point_scale));
@@ -138,4 +88,34 @@ std::vector<flo::region_pixel> flo::detail::brush_region_aux(
             return cell_data.weight > 0.0;
         }
     ) | r::to<std::vector>();
+}
+
+flo::brush::brush(const brush_params& params, const paint_particle& p) : 
+        params_(params), paint_(p) {
+
+}
+
+void flo::brush::apply(canvas& canv, const point& loc, const elapsed_time& t) {
+
+    if (params_.mix) {
+        auto brush_rgn_area =
+            brush_region_area(canv.bounds(), loc, params_.radius, params_.aa_level);
+        auto paint_on_canvas =
+            all_paint_in_brush_region(canv, loc, params_.radius, params_.aa_level);
+        paint_on_canvas.normalize();
+
+        auto k = params_.paint_transfer_coeff;
+        auto new_paint = (paint_on_canvas.volume() > 0.0) ?
+            (1.0 - k) * paint_on_canvas + k * paint_ :
+            paint_;
+
+        paint_ = new_paint;
+    }
+
+    if (params_.mode == paint_mode::overlay) {
+        overlay(canv, loc, params_.radius, params_.aa_level, paint_);
+    } else {
+        fill(canv, loc, params_.radius, params_.aa_level, paint_);
+    }
+    
 }
