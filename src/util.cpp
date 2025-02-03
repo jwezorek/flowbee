@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <format>
 #include <random>
-
+#include <stdexcept>
 
 namespace fs = std::filesystem;
 namespace r = std::ranges;
@@ -115,7 +115,7 @@ flo::scalar_field flo::white_noise(int wd, int hgt) {
 }
 
 flo::scalar_field flo::perlin_noise(const flo::dimensions& sz, uint32_t seed, int octaves, double freq) {
-    auto noise = scalar_field(sz.hgt, sz.wd, 0.0);
+    auto noise = scalar_field(sz.wd, sz.hgt, 0.0);
 
     siv::PerlinNoise perlin{ seed };
     auto dim = std::max(sz.wd, sz.hgt);
@@ -159,8 +159,8 @@ bool flo::in_bounds(const coords& p, const dimensions& dim) {
     return p.x >= 0 && p.x < dim.wd && p.y >= 0 && p.y < dim.hgt;
 }
 
-flo::dimensions flo::convex_hull_bounds(std::span<point> pts)
-{
+flo::dimensions flo::convex_hull_bounds(std::span<point> pts) {
+
     if (pts.empty()) return dimensions{ 0, 0 };
 
     double min_x = pts[0].x, max_x = pts[0].x;
@@ -177,8 +177,43 @@ flo::dimensions flo::convex_hull_bounds(std::span<point> pts)
     int height = static_cast<int>(std::ceil(max_y - min_y));
 
     return dimensions{ width, height };
+
 }
 
 flo::coords flo::to_coords(const point& pt) {
+
     return { static_cast<int>(pt.x), static_cast<int>(pt.y) };
+
+}
+
+flo::rgb_color flo::hex_str_to_rgb(const std::string& hex) {
+
+    if (hex.length() != 7 || hex[0] != '#') {
+        throw std::invalid_argument("Hex string must be in the format #RRGGBB");
+    }
+
+    auto hex_to_uint8 = [](const std::string& str) -> uint8_t {
+        unsigned int value;
+        std::stringstream ss;
+        ss << std::hex << str;
+        ss >> value;
+        return static_cast<uint8_t>(value);
+    };
+
+    std::string red_str = hex.substr(1, 2);
+    std::string green_str = hex.substr(3, 2);
+    std::string blue_str = hex.substr(5, 2);
+
+    // Convert to lowercase for case insensitivity
+    for (auto& c : red_str) c = std::tolower(c);
+    for (auto& c : green_str) c = std::tolower(c);
+    for (auto& c : blue_str) c = std::tolower(c);
+
+    rgb_color color;
+    color.red = hex_to_uint8(red_str);
+    color.green = hex_to_uint8(green_str);
+    color.blue = hex_to_uint8(blue_str);
+
+    return color;
+
 }
