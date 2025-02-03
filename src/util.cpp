@@ -186,6 +186,11 @@ flo::coords flo::to_coords(const point& pt) {
 
 }
 
+flo::point flo::to_point(const coords& cds)
+{
+    return { static_cast<double>(cds.x), static_cast<double>(cds.y) };
+}
+
 flo::rgb_color flo::hex_str_to_rgb(const std::string& hex) {
 
     if (hex.length() != 7 || hex[0] != '#') {

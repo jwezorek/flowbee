@@ -120,6 +120,31 @@ int flo::canvas::palette_size() const {
     return static_cast<int>(palette_.size());
 }
 
+int flo::canvas::num_blank_locs() const
+{
+    return r::count_if(
+        impl_.entries(),
+        [](auto&& pp) {
+            return pp.volume() == 0.0;
+        }
+    );
+}
+
+std::vector<flo::coords> flo::canvas::blank_locs() const
+{
+    return locations(impl_.bounds()) | rv::filter(
+            [&](auto&& pair) {
+                auto [x, y] = pair;
+                return impl_[x, y].volume() == 0.0;
+            }
+        ) | rv::transform(
+            [&](auto&& pair)->coords {
+                auto [x, y] = pair;
+                return { x,y };
+            }
+        ) | r::to<std::vector>();
+}
+
 double flo::brush_region_area(const dimensions& dim, const point& loc, double rad, int aa) {
     return r::fold_left(
         flo::brush_region(dim, loc, rad, aa) | rv::transform([](auto&& rp) {return rp.weight; }),

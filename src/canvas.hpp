@@ -26,6 +26,8 @@ namespace flo {
 
         pigment color_at(int x, int y) const;
         int palette_size() const;
+        int num_blank_locs() const;
+        std::vector<coords> blank_locs() const;
     };
 
     double brush_region_area(const dimensions& canvas_dimensions,

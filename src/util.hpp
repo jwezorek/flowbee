@@ -23,6 +23,7 @@ namespace flo {
     bool in_bounds(const coords& p, const dimensions& dim);
     dimensions convex_hull_bounds(std::span<point> pts);
     coords to_coords(const point& pt);
+    point to_point(const coords& cds);
     rgb_color hex_str_to_rgb(const std::string& hex);
 
     template <typename T> int sgn(T val) {

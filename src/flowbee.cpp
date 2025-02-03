@@ -14,8 +14,33 @@ namespace {
         std::deque<flo::point> history;
     };
 
+    flo::point random_loc(const flo::dimensions& dim) {
+        return flo::point{
+            flo::uniform_rand(0, dim.wd - 1),
+            flo::uniform_rand(0, dim.hgt - 1)
+        };
+    }
+
+    flo::point random_blank_loc(const flo::canvas& canv) {
+        auto blank_locs = canv.blank_locs();
+        if (blank_locs.empty()) {
+            return random_loc(canv.bounds());
+        }
+        auto index = flo::rand_number(0, blank_locs.size() - 1);
+        return flo::to_point(blank_locs.at(index));
+    }
+
     paint_glob random_paint_glob(
-            const flo::brush_params& params, int num_colors, const flo::dimensions& dim) {
+            const flo::canvas& canv,
+            const flo::brush_params& params, int num_colors,
+            bool populate_white_space) {
+
+        auto dim = canv.bounds();
+        int area = dim.wd * dim.hgt;
+        flo::point rand_loc = (populate_white_space && canv.num_blank_locs() < area / 2) ?
+            random_blank_loc(canv) :
+            random_loc(dim);
+
         paint_glob p = {
             flo::brush(
                 params,
@@ -25,15 +50,37 @@ namespace {
             ),
             {}
         };
-        p.history.push_back(
-            flo::point{
-                flo::uniform_rand(0, dim.wd - 1),
-                flo::uniform_rand(0, dim.hgt - 1)
-            }
-        );
+        p.history.push_back( rand_loc );
         return p;
     }
 
+    bool is_done(const flo::canvas& canv, int iters, const flo::flowbee_params& params) {
+        if (params.iterations) {
+            return iters >= params.iterations.value();
+        }
+        return canv.num_blank_locs() == 0;
+    }
+
+    double pcnt_done(const flo::canvas& canv, int iters, const flo::flowbee_params& params) {
+        
+        if (params.iterations) {
+            return static_cast<double>(iters) / static_cast<double>(*params.iterations);
+        }
+        auto dim = canv.bounds();
+        auto area = static_cast<double>(dim.wd * dim.hgt);
+        return (area - static_cast<double>(canv.num_blank_locs())) / area;
+    }
+
+    void display_progress(int& iters, const flo::canvas& canv, const flo::flowbee_params& params) {
+        if (++iters % 50 == 0) {
+            std::print(".");
+        }
+        if (iters > 0 && iters % 500 == 0) {
+            std::println(" {:.4f}%",
+                100.0 * pcnt_done(canv, iters, params)
+            );
+        }
+    }
 }
 
 
@@ -45,8 +92,15 @@ flo::flowbee_params::flowbee_params(const brush_params& b, int iters, int n_part
     alpha_threshold(1.0),
     delta_t(2.0),
     iterations(iters),
-    num_particles(n_particles)
+    num_particles(n_particles),
+    populate_white_space(true)
 {
+}
+
+flo::flowbee_params::flowbee_params(const brush_params& b, int n_particles) :
+    flowbee_params(b, 0, n_particles)
+{
+    iterations = {};
 }
 
 void flo::do_flowbee(
@@ -59,16 +113,16 @@ void flo::do_flowbee(
 
     std::vector<paint_glob> particles = rv::iota(0, params.num_particles) | rv::transform(
         [&](auto)->paint_glob {
-            return random_paint_glob(params.brush, num_colors, dim);
+            return random_paint_glob(canvas, params.brush, num_colors, false);
         }
     ) | r::to<std::vector>();
 
     double elapsed = 0;
-    for (int i = 0; i < params.iterations; ++i) {
-        if (i % 100 == 0) {
-            std::println("{}", i);
-        }
+    int iters = 0;
+    while (! is_done(canvas, iters, params)) {
 
+        display_progress(iters, canvas, params);
+        
         for (auto& p : particles) {
             auto loc = p.history.back();
 
@@ -100,7 +154,9 @@ void flo::do_flowbee(
 
         while (particles.size() < params.num_particles) {
             particles.push_back(
-                random_paint_glob(params.brush, num_colors, dim)
+                random_paint_glob(
+                    canvas, params.brush, num_colors, params.populate_white_space
+                )
             );
         }
 
@@ -111,6 +167,8 @@ void flo::do_flowbee(
         outfile_path,
         flo::canvas_to_image(canvas, params.alpha_threshold)
     );
+
+    std::println("\ncomplete.\n(after {} iterations)", iters);
 
 }
 

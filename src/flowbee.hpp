@@ -4,6 +4,8 @@
 #include "brush.hpp"
 #include "canvas.hpp"
 #include "vector_field.hpp"
+#include <variant>
+#include <optional>
 
 namespace flo {
 
@@ -14,10 +16,12 @@ namespace flo {
         double dead_particle_area_sz;
         double alpha_threshold;
         double delta_t;
-        int iterations;
+        std::optional<int> iterations;
         int num_particles;
+        bool populate_white_space;
 
         flowbee_params(const brush_params& b, int iters, int n_particles);
+        flowbee_params(const brush_params& b, int n_particles);
     };
 
     void do_flowbee(
