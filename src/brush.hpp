@@ -2,11 +2,12 @@
 
 #include <functional>
 #include <ranges>
+#include <print>
+#include <optional>
 #include "types.hpp"
 #include "canvas.hpp"
 #include "paint_particle.hpp"
 #include "util.hpp"
-#include <print>
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -51,6 +52,7 @@ namespace flo {
 
     struct brush_params {
         double radius;
+        std::optional<double> radius_ramp_in_time;
         bool mix;
         paint_mode mode;
         int aa_level;

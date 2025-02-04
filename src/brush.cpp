@@ -97,11 +97,16 @@ flo::brush::brush(const brush_params& params, const paint_particle& p) :
 
 void flo::brush::apply(canvas& canv, const point& loc, const elapsed_time& t) {
 
+    double radius = (!params_.radius_ramp_in_time || t.elapsed > *params_.radius_ramp_in_time) ?
+        params_.radius :
+        (t.elapsed / *params_.radius_ramp_in_time) * (params_.radius - 1.0) + 1.0;
+
+
     if (params_.mix) {
         auto brush_rgn_area =
-            brush_region_area(canv.bounds(), loc, params_.radius, params_.aa_level);
+            brush_region_area(canv.bounds(), loc, radius, params_.aa_level);
         auto paint_on_canvas =
-            all_paint_in_brush_region(canv, loc, params_.radius, params_.aa_level);
+            all_paint_in_brush_region(canv, loc, radius, params_.aa_level);
         paint_on_canvas.normalize();
 
         auto k = params_.paint_transfer_coeff;
@@ -113,11 +118,11 @@ void flo::brush::apply(canvas& canv, const point& loc, const elapsed_time& t) {
     }
 
     if (params_.mode == paint_mode::overlay) {
-        overlay(canv, loc, params_.radius, params_.aa_level, paint_);
+        overlay(canv, loc, radius, params_.aa_level, paint_);
     } else if (params_.mode == paint_mode::fill) {
-        fill(canv, loc, params_.radius, params_.aa_level, paint_);
+        fill(canv, loc, radius, params_.aa_level, paint_);
     } else {
-        mix(canv, loc, params_.radius, params_.aa_level);
+        mix(canv, loc, radius, params_.aa_level);
     }
     
 }

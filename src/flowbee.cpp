@@ -10,6 +10,7 @@ namespace rv = std::ranges::views;
 namespace {
 
     struct paint_glob {
+        double elapsed;
         flo::brush brush;
         std::deque<flo::point> history;
     };
@@ -42,6 +43,7 @@ namespace {
             random_loc(dim);
 
         paint_glob p = {
+            0.0,
             flo::brush(
                 params,
                 flo::make_one_color_paint(
@@ -117,7 +119,6 @@ void flo::do_flowbee(
         }
     ) | r::to<std::vector>();
 
-    double elapsed = 0;
     int iters = 0;
     while (! is_done(canvas, iters, params)) {
 
@@ -126,7 +127,9 @@ void flo::do_flowbee(
         for (auto& p : particles) {
             auto loc = p.history.back();
 
-            p.brush.apply(canvas, loc, { params.delta_t, elapsed });
+            p.brush.apply(canvas, loc, { params.delta_t, p.elapsed });
+            p.elapsed += params.delta_t;
+
             flo::point velocity = vector_from_field(flow, loc);
             loc = loc + params.delta_t * velocity;
             p.history.push_back(loc);
@@ -159,8 +162,6 @@ void flo::do_flowbee(
                 )
             );
         }
-
-        elapsed += params.delta_t;
     }
 
     flo::img_to_file(
