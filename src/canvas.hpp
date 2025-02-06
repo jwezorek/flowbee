@@ -44,6 +44,7 @@ namespace flo {
     void mix(canvas& canv, const point& loc, double radius, int aa_level);
 
     canvas image_to_canvas(const image& img, int n, double vol_per_pixel = 1.0);
-    image canvas_to_image(const canvas& canv, double alpha_threshold);
+    image canvas_to_image(const canvas& canv, double alpha_threshold, 
+        const rgb_color& canvas_color = {255,255,255});
 
 }

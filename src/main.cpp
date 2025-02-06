@@ -31,14 +31,14 @@ int main(int argc, char* argv[]) {
 
     std::println("flowbee...");
 
-    //std::vector<flo::rgb_color> palette =
-    //    std::array<std::string, 5>{ "#ffac81","#ff928b","#fec3a6","#efe9ae","#cdeac0" } |
-    //    rv::transform(flo::hex_str_to_rgb) | r::to<std::vector>();
+    std::vector<flo::rgb_color> palette =
+        std::array<std::string, 5>{ "#ffac81","#ff928b","#fec3a6","#efe9ae","#cdeac0" } |
+        rv::transform(flo::hex_str_to_rgb) | r::to<std::vector>();
 
     
-    std::vector<flo::rgb_color> palette =
-        std::array<std::string, 6>{ "#ddedff","#ddddff","#ff595e", "#ffca3a", "#8ac926", "#1982c4" } |
-        rv::transform(flo::hex_str_to_rgb) | r::to<std::vector>();
+    //std::vector<flo::rgb_color> palette =
+    //    std::array<std::string, 6>{ "#ddedff","#ddddff","#ff595e", "#ffca3a", "#8ac926", "#1982c4" } |
+    //    rv::transform(flo::hex_str_to_rgb) | r::to<std::vector>();
     
 
 
@@ -52,29 +52,31 @@ int main(int argc, char* argv[]) {
     flow = flo::normalize( flow + circle + 2.0*out);
     */
 
-    auto dim = flo::dimensions{ 1600,1200 };
-    auto spiral = flo::loxodromic_spiral_vector_field(dim, true, 600, 2.0);
-    auto x_comp = flo::pow(flo::perlin_noise(dim, 175117, 8, 8.0), 0.5);
-    auto y_comp = flo::pow(flo::perlin_noise(dim, 367171, 8, 8.0), 0.5);
+    auto pi = std::numbers::pi;
+    auto dim = flo::dimensions{ 2560, 1440 };
+    auto spiral = flo::loxodromic_spiral_vector_field(dim, false, 800, 5*pi);
+    auto x_comp = flo::pow(flo::perlin_noise(dim, 15117, 8, 8.0), 0.5);
+    auto y_comp = flo::pow(flo::perlin_noise(dim, 36771, 8, 8.0), 0.5);
     auto rand = flo::vector_field_from_scalar_fields(x_comp, y_comp);
 
-    auto flow = flo::normalize(spiral + 0.4 * rand);
+    auto flow = flo::normalize(spiral + 0.3 * rand);
     auto params = flo::flowbee_params(
         flo::brush_params{
-            .radius = 10.0,
-            .radius_ramp_in_time = 500.0,
+            .radius = 25.0,
+            .radius_ramp_in_time = 100.0,
             .mix = true,
-            .mode = flo::paint_mode::overlay,
+            .mode = flo::paint_mode::fill,
             .aa_level = 4,
-            .paint_transfer_coeff = 0.35
+            .paint_transfer_coeff = 0.55
         },
-        50000,
+        500,
         100
     );
+    params.canvas_color = { 0,0,0 };
     //params.max_particle_history = 100;
     //params.dead_particle_area_sz = 20;
     flo::do_flowbee(
-        "D:\\test\\flowbee_loxodrome.png",
+        "D:\\test\\flowbee_loxo_2.png",
         palette,
         flow,
         params

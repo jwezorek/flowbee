@@ -19,6 +19,7 @@ namespace flo {
         std::optional<int> iterations;
         int num_particles;
         bool populate_white_space;
+        rgb_color canvas_color;
 
         flowbee_params(const brush_params& b, int iters, int n_particles);
         flowbee_params(const brush_params& b, int n_particles);

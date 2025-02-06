@@ -185,8 +185,9 @@ flo::canvas flo::image_to_canvas(const image& img, int n, double vol_per_pixel) 
     return canv;
 }
 
-flo::image flo::canvas_to_image(const canvas& canv, double alpha_threshold) {
-    static const auto white = rgb_to_pigment(255, 255, 255);
+flo::image flo::canvas_to_image(const canvas& canv, double alpha_threshold,
+        const rgb_color& canvas_color) {
+    static const auto bkgd = rgb_to_pigment(canvas_color);
     flo::image img(canv.bounds());
     for (auto [x, y] : locations(img.bounds())) {
         auto pigment = canv.color_at(x, y);
@@ -198,7 +199,7 @@ flo::image flo::canvas_to_image(const canvas& canv, double alpha_threshold) {
                 int aaa;
                 aaa = 5;
             }
-            pigment = mix_pigments(white, (1.0 - alpha), pigment, alpha);
+            pigment = mix_pigments(bkgd, (1.0 - alpha), pigment, alpha);
         }
         img[x, y] = rgb_to_pixel(pigment_to_rgb(pigment));
     }

@@ -193,8 +193,13 @@ flo::point flo::to_point(const coords& cds)
 
 flo::rgb_color flo::hex_str_to_rgb(const std::string& hex) {
 
-    if (hex.length() != 7 || hex[0] != '#') {
-        throw std::invalid_argument("Hex string must be in the format #RRGGBB");
+    std::string hex_code = hex;
+    if (hex_code[0] == '#') {
+        hex_code = hex_code.substr(1);
+    }
+
+    if (hex_code.length() != 6) {
+        throw std::invalid_argument("Hex string must be in the format RRGGBB or #RRGGBB");
     }
 
     auto hex_to_uint8 = [](const std::string& str) -> uint8_t {
@@ -203,11 +208,11 @@ flo::rgb_color flo::hex_str_to_rgb(const std::string& hex) {
         ss << std::hex << str;
         ss >> value;
         return static_cast<uint8_t>(value);
-    };
+        };
 
-    std::string red_str = hex.substr(1, 2);
-    std::string green_str = hex.substr(3, 2);
-    std::string blue_str = hex.substr(5, 2);
+    std::string red_str = hex_code.substr(0, 2);
+    std::string green_str = hex_code.substr(2, 2);
+    std::string blue_str = hex_code.substr(4, 2);
 
     // Convert to lowercase for case insensitivity
     for (auto& c : red_str) c = std::tolower(c);

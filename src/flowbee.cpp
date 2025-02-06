@@ -95,7 +95,8 @@ flo::flowbee_params::flowbee_params(const brush_params& b, int iters, int n_part
     delta_t(2.0),
     iterations(iters),
     num_particles(n_particles),
-    populate_white_space(true)
+    populate_white_space(true),
+    canvas_color{255,255,255}
 {
 }
 
@@ -166,7 +167,9 @@ void flo::do_flowbee(
 
     flo::img_to_file(
         outfile_path,
-        flo::canvas_to_image(canvas, params.alpha_threshold)
+        flo::canvas_to_image(
+            canvas, params.alpha_threshold, params.canvas_color
+        )
     );
 
     std::println("\ncomplete.\n(after {} iterations)", iters);
