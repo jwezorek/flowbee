@@ -1,5 +1,6 @@
 #include "vector_field.hpp"
 #include "util.hpp"
+#include <numbers>
 
 namespace r = std::ranges;
 namespace rv = std::ranges::views;
@@ -7,6 +8,42 @@ namespace rv = std::ranges::views;
 /*------------------------------------------------------------------------------------------------*/
 
 namespace {
+
+    flo::point tangent_of_loxodromic_spiral(
+        bool outward,
+        double x, double y, double dist, double width, double height, double rho, double theta_rate) {
+        using namespace flo;
+        // Calculate the spiral centers based on provided dimensions and distance
+        point center1 = { width / 2.0 - dist / 2.0, height / 2.0 };
+        point center2 = { width / 2.0 + dist / 2.0, height / 2.0 };
+
+        // Compute the gradient of the scalar potential field with scaling factor rho
+        double dx = rho * ((x - center2.x) / ((x - center2.x) * (x - center2.x) + (y - center2.y) * (y - center2.y))
+            - (x - center1.x) / ((x - center1.x) * (x - center1.x) + (y - center1.y) * (y - center1.y)));
+
+        double dy = rho * ((y - center2.y) / ((x - center2.x) * (x - center2.x) + (y - center2.y) * (y - center2.y))
+            - (y - center1.y) / ((x - center1.x) * (x - center1.x) + (y - center1.y) * (y - center1.y)));
+
+        // Compute the tangent vector by rotating the gradient by 90 degrees
+        double tangent_x = -dy;
+        double tangent_y = dx;
+
+        // Apply additional rotation based on theta_rate to introduce spiraling effect
+        double angle = theta_rate * std::log(std::sqrt((x - center1.x) * (x - center1.x) + (y - center1.y) * (y - center1.y)) + 1e-6);
+        if (outward) {
+            angle += std::numbers::pi;
+        }
+        double rotated_x = tangent_x * std::cos(angle) - tangent_y * std::sin(angle);
+        double rotated_y = tangent_x * std::sin(angle) + tangent_y * std::cos(angle);
+
+        // Normalize the tangent vector
+        double magnitude = std::sqrt(rotated_x * rotated_x + rotated_y * rotated_y);
+        double normalized_x = rotated_x / magnitude;
+        double normalized_y = rotated_y / magnitude;
+
+        // Return the normalized tangent vector field as point
+        return point{ normalized_x, normalized_y };
+    }
 
     flo::vector_field normalized_vector_field(
         const flo::scalar_field& x_field, const flo::scalar_field& y_field) {
@@ -140,6 +177,21 @@ flo::vector_field flo::circular_vector_field(const dimensions& dim, circle_field
         x_comp,
         y_comp
     };
+}
+
+flo::vector_field flo::loxodromic_spiral_vector_field(
+        const dimensions& dim, bool outward, double centers_dist, double theta_rate) {
+
+    auto xx = flo::scalar_field(dim);
+    auto yy = flo::scalar_field(dim);
+    for (auto [x, y] : flo::locations(dim)) {
+        auto vec2 = tangent_of_loxodromic_spiral(
+            outward, x, y, centers_dist, dim.wd, dim.hgt, 0.15, theta_rate
+        );
+        xx[x, y] = vec2.x;
+        yy[x, y] = vec2.y;
+    }
+    return flo::vector_field(xx, yy);
 }
 
 flo::vector_field flo::operator*(const point& v, const vector_field& field) {
