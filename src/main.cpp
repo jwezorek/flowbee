@@ -53,8 +53,8 @@ int main(int argc, char* argv[]) {
     */
 
     auto pi = std::numbers::pi;
-    auto dim = flo::dimensions{ 2560, 1440 };
-    auto spiral = flo::loxodromic_spiral_vector_field(dim, false, 800, 5*pi);
+    auto dim = flo::dimensions{ 800, 800 };
+    auto spiral = flo::loxodromic_spiral_vector_field(dim, false, 400, 5*pi);
     auto x_comp = flo::pow(flo::perlin_noise(dim, 15117, 8, 8.0), 0.5);
     auto y_comp = flo::pow(flo::perlin_noise(dim, 36771, 8, 8.0), 0.5);
     auto rand = flo::vector_field_from_scalar_fields(x_comp, y_comp);
@@ -62,21 +62,21 @@ int main(int argc, char* argv[]) {
     auto flow = flo::normalize(spiral + 0.3 * rand);
     auto params = flo::flowbee_params(
         flo::brush_params{
-            .radius = 25.0,
-            .radius_ramp_in_time = 100.0,
+            .radius = 10.0,
+            .radius_ramp_in_time = 50.0,
             .mix = true,
             .mode = flo::paint_mode::fill,
             .aa_level = 4,
             .paint_transfer_coeff = 0.55
         },
-        500,
-        100
+        300,
+        25
     );
-    params.canvas_color = { 0,0,0 };
+    //params.canvas_color = { 0,0,0 };
     //params.max_particle_history = 100;
     //params.dead_particle_area_sz = 20;
     flo::do_flowbee(
-        "D:\\test\\flowbee_loxo_2.png",
+        "D:\\test\\flowbee_loxo_small.png",
         palette,
         flow,
         params

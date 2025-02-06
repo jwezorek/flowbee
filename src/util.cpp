@@ -144,6 +144,14 @@ int flo::rand_number(int min, int max) {
     return distribution(g_generator);
 }
 
+double flo::normal_rand(double mean, double stddev) {
+    if (stddev == 0.0) {
+        return mean;
+    }
+    std::normal_distribution<double> distribution(mean, stddev);
+    return distribution(g_generator);
+}
+
 double flo::uniform_rand(double low, double high) {
     static std::uniform_real_distribution<double> distribution(low, high);
     return distribution(g_generator);

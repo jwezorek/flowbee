@@ -91,25 +91,30 @@ std::vector<flo::region_pixel> flo::detail::brush_region_aux(
 }
 
 flo::brush::brush(const brush_params& params, const paint_particle& p) : 
-        params_(params), paint_(p) {
+        radius_(params.radius),
+        ramp_in_time_(params.radius_ramp_in_time),
+        mix_(params.mix),
+        mode_(params.mode),
+        aa_level_(params.aa_level),
+        paint_transfer_coeff_(params.paint_transfer_coeff),
+        paint_(p) {
 
 }
 
 void flo::brush::apply(canvas& canv, const point& loc, const elapsed_time& t) {
 
-    double radius = (!params_.radius_ramp_in_time || t.elapsed > *params_.radius_ramp_in_time) ?
-        params_.radius :
-        (t.elapsed / *params_.radius_ramp_in_time) * (params_.radius - 1.0) + 1.0;
+    double radius = (!ramp_in_time_ || t.elapsed > *ramp_in_time_) ?
+        radius_ :
+        (t.elapsed / *ramp_in_time_) * (radius_ - 1.0) + 1.0;
 
-
-    if (params_.mix) {
+    if (mix_) {
         auto brush_rgn_area =
-            brush_region_area(canv.bounds(), loc, radius, params_.aa_level);
+            brush_region_area(canv.bounds(), loc, radius, aa_level_);
         auto paint_on_canvas =
-            all_paint_in_brush_region(canv, loc, radius, params_.aa_level);
+            all_paint_in_brush_region(canv, loc, radius, aa_level_);
         paint_on_canvas.normalize();
 
-        auto k = params_.paint_transfer_coeff;
+        auto k = paint_transfer_coeff_;
         auto new_paint = (paint_on_canvas.volume() > 0.0) ?
             (1.0 - k) * paint_on_canvas + k * paint_ :
             paint_;
@@ -117,12 +122,12 @@ void flo::brush::apply(canvas& canv, const point& loc, const elapsed_time& t) {
         paint_ = new_paint;
     }
 
-    if (params_.mode == paint_mode::overlay) {
-        overlay(canv, loc, radius, params_.aa_level, paint_);
-    } else if (params_.mode == paint_mode::fill) {
-        fill(canv, loc, radius, params_.aa_level, paint_);
+    if (mode_ == paint_mode::overlay) {
+        overlay(canv, loc, radius, aa_level_, paint_);
+    } else if (mode_ == paint_mode::fill) {
+        fill(canv, loc, radius, aa_level_, paint_);
     } else {
-        mix(canv, loc, radius, params_.aa_level);
+        mix(canv, loc, radius, aa_level_);
     }
     
 }

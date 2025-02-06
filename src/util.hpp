@@ -18,6 +18,7 @@ namespace flo {
     scalar_field perlin_noise(const flo::dimensions& sz, uint32_t seed, int octaves, double freq);
     rgb_color random_rgb_color();
     int rand_number(int min, int max);
+    double normal_rand(double mean, double stddev);
     double uniform_rand(double low = 0.0, double high = 1.0);
     bool in_bounds(const point& p, const dimensions& dim);
     bool in_bounds(const coords& p, const dimensions& dim);

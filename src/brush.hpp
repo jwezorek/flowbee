@@ -72,7 +72,12 @@ namespace flo {
     };
 
     class brush {
-        brush_params params_;
+        double radius_;
+        std::optional<double> ramp_in_time_;
+        bool mix_;
+        paint_mode mode_;
+        int aa_level_;
+        double paint_transfer_coeff_;
         paint_particle paint_;
     public:
         brush() {}
