@@ -9,8 +9,6 @@ if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS}) 
 endif()
 
-find_package(Eigen3 3.3 REQUIRED)
-
 add_executable(flowbee
     src/third-party/mixbox.cpp
     src/main.cpp
@@ -23,5 +21,4 @@ add_executable(flowbee
     src/flowbee.cpp
 )
 
-target_link_libraries(flowbee PRIVATE Eigen3::Eigen)
 set_target_properties(${BUILD_TARGET} PROPERTIES LINK_FLAGS "/PROFILE")
