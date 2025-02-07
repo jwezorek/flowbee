@@ -15,6 +15,24 @@ namespace {
 
     constexpr double k_fixed_point_scale = 10000.0;
 
+    double current_radius(double elapsed, double base_radius, std::optional<double> ramp_in_time,
+            std::optional<double> stroke_lifespan, std::optional<double> ramp_out_time) {
+        double in_radius = base_radius;
+        double out_radius = base_radius;
+        if (ramp_in_time && elapsed < *ramp_in_time) {
+            in_radius = (elapsed / *ramp_in_time) * (base_radius - 1.0) + 1.0;
+        }
+        if (stroke_lifespan && ramp_out_time) {
+            auto time_left = *stroke_lifespan - elapsed;
+            if (time_left < 0.0) {
+                out_radius = 0.0;
+            }
+            if (time_left < *ramp_out_time) {
+                out_radius = (time_left / *ramp_out_time) * (base_radius - 1.0) + 1.0;
+            }
+        }
+        return std::min(in_radius, out_radius);
+    }
 }
 
 flo::detail::memo_key::memo_key(flo::point loc, double radius, int aa) {
@@ -97,15 +115,19 @@ flo::brush::brush(const brush_params& params, const paint_particle& p) :
         mode_(params.mode),
         aa_level_(params.aa_level),
         paint_transfer_coeff_(params.paint_transfer_coeff),
-        paint_(p) {
+        paint_(p),
+        alive_(true) {
+
+    if (params.stroke_lifetime) {
+        lifespan_ = normal_rand(params.stroke_lifetime->mean, params.stroke_lifetime->stddev);
+        ramp_out_time_ = params.stroke_lifetime->ramp_out_time;
+    }
 
 }
 
 void flo::brush::apply(canvas& canv, const point& loc, const elapsed_time& t) {
 
-    double radius = (!ramp_in_time_ || t.elapsed > *ramp_in_time_) ?
-        radius_ :
-        (t.elapsed / *ramp_in_time_) * (radius_ - 1.0) + 1.0;
+    double radius = current_radius( t.elapsed, radius_, ramp_in_time_, lifespan_, ramp_out_time_);
 
     if (mix_) {
         auto brush_rgn_area =
@@ -130,4 +152,23 @@ void flo::brush::apply(canvas& canv, const point& loc, const elapsed_time& t) {
         mix(canv, loc, radius, aa_level_);
     }
     
+    if (lifespan_ && t.elapsed >= lifespan_) {
+        alive_ = false;
+    }
+}
+
+bool flo::brush::is_alive() const {
+    return alive_;
+}
+
+std::optional<double> flo::brush::lifespan() const {
+    return lifespan_;
+}
+
+void flo::brush::set_lifespan(double duration) {
+    lifespan_ = duration;
+}
+
+void flo::brush::set_radius(double rad) {
+    radius_ = rad;
 }

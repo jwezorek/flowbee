@@ -15,6 +15,26 @@ namespace {
         std::deque<flo::point> history;
     };
 
+    bool is_particle_alive(const paint_glob& p, const flo::dimensions& bounds, 
+            int max_particle_history, int dead_particle_area_sz) {
+        if (!p.brush.is_alive()) {
+            return false;
+        }
+        if (!flo::in_bounds(p.history.back(), bounds)) {
+            return false;
+        }
+        
+        if (p.history.size() == max_particle_history) {
+            auto points = p.history | r::to<std::vector>();
+            auto hull_dim = flo::convex_hull_bounds(points);
+            if (hull_dim.wd < dead_particle_area_sz && hull_dim.hgt <dead_particle_area_sz) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     flo::point random_loc(const flo::dimensions& dim) {
         return flo::point{
             flo::uniform_rand(0, dim.wd - 1),
@@ -34,7 +54,8 @@ namespace {
     paint_glob random_paint_glob(
             const flo::canvas& canv,
             const flo::brush_params& params, int num_colors,
-            bool populate_white_space) {
+            bool populate_white_space, double elapsed, 
+            std::optional<double> total_time) {
 
         auto dim = canv.bounds();
         int area = dim.wd * dim.hgt;
@@ -42,14 +63,26 @@ namespace {
             random_blank_loc(canv) :
             random_loc(dim);
 
+        auto brush = flo::brush(
+            params,
+            flo::make_one_color_paint(
+                num_colors, flo::rand_number(0, num_colors - 1), 1.0
+            )
+        );
+
+        // if the brush has a ramp out period that extends beyond the known
+        // duration of the simulation, truncate the brush's lifespan so that
+        // it ends when the simulation ends.
+
+        if (brush.lifespan() && total_time) {
+            if (elapsed + *brush.lifespan() > *total_time) {
+                brush.set_lifespan(*total_time - elapsed);
+            }
+        }
+
         paint_glob p = {
             0.0,
-            flo::brush(
-                params,
-                flo::make_one_color_paint(
-                    num_colors, flo::rand_number(0, num_colors - 1), 1.0
-                )
-            ),
+            brush,
             {}
         };
         p.history.push_back( rand_loc );
@@ -73,8 +106,9 @@ namespace {
         return (area - static_cast<double>(canv.num_blank_locs())) / area;
     }
 
-    void display_progress(int& iters, const flo::canvas& canv, const flo::flowbee_params& params) {
-        if (++iters % 50 == 0) {
+    void display_progress(int iters, const flo::canvas& canv, const flo::flowbee_params& params) {
+        iters++;
+        if (iters % 50 == 0) {
             std::print(".");
         }
         if (iters > 0 && iters % 500 == 0) {
@@ -92,7 +126,7 @@ flo::flowbee_params::flowbee_params(const brush_params& b, int iters, int n_part
     max_particle_history(10),
     dead_particle_area_sz(3.0),
     alpha_threshold(1.0),
-    delta_t(2.0),
+    delta_t(1.0),
     iterations(iters),
     num_particles(n_particles),
     populate_white_space(true),
@@ -113,14 +147,20 @@ void flo::do_flowbee(
     auto dim = flow.x.bounds();
     flo::canvas canvas(palette, dim);
     int num_colors = static_cast<int>(palette.size());
+    int iters = 0;
+    double elapsed = 0.0;
+
+    std::optional<double> total_time;
+    if (params.iterations) {
+        total_time = *params.iterations * params.delta_t;
+    }
 
     std::vector<paint_glob> particles = rv::iota(0, params.num_particles) | rv::transform(
         [&](auto)->paint_glob {
-            return random_paint_glob(canvas, params.brush, num_colors, false);
+            return random_paint_glob(canvas, params.brush, num_colors, false, elapsed, total_time);
         }
     ) | r::to<std::vector>();
 
-    int iters = 0;
     while (! is_done(canvas, iters, params)) {
 
         display_progress(iters, canvas, params);
@@ -141,28 +181,24 @@ void flo::do_flowbee(
 
         particles = particles | rv::filter(
             [&](const auto& p) {
-                if (!flo::in_bounds(p.history.back(), dim)) {
-                    return false;
-                }
-                if (p.history.size() == params.max_particle_history) {
-                    auto points = p.history | r::to<std::vector>();
-                    auto hull_dim = flo::convex_hull_bounds(points);
-                    if (hull_dim.wd < params.dead_particle_area_sz && 
-                            hull_dim.hgt < params.dead_particle_area_sz) {
-                        return false;
-                    }
-                }
-                return true;
+                auto alive = is_particle_alive(
+                    p, dim, params.max_particle_history, params.dead_particle_area_sz
+                );
+                return alive;
             }
         ) | r::to<std::vector>();
 
         while (particles.size() < params.num_particles) {
             particles.push_back(
                 random_paint_glob(
-                    canvas, params.brush, num_colors, params.populate_white_space
+                    canvas, params.brush, num_colors, params.populate_white_space,
+                    elapsed, total_time
                 )
             );
         }
+
+        ++iters;
+        elapsed += params.delta_t;
     }
 
     flo::img_to_file(

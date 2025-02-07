@@ -50,6 +50,12 @@ namespace flo {
         mix
     };
 
+    struct stroke_lifetime {
+        double mean;
+        double stddev;
+        std::optional<double> ramp_out_time;
+    };
+
     struct brush_params {
         double radius;
         std::optional<double> radius_ramp_in_time;
@@ -57,32 +63,35 @@ namespace flo {
         paint_mode mode;
         int aa_level;
         double paint_transfer_coeff;
+        std::optional<stroke_lifetime> stroke_lifetime;
     };
-
-    struct application_params {
-        point loc;
-        double time;
-    };
-
-    using brush_fn = std::function<void(canvas&, brush_params&, const application_params&)>;
 
     struct elapsed_time {
         double delta_t;
         double elapsed;
     };
 
+
     class brush {
+
         double radius_;
         std::optional<double> ramp_in_time_;
+        std::optional<double> ramp_out_time_;
         bool mix_;
         paint_mode mode_;
         int aa_level_;
         double paint_transfer_coeff_;
         paint_particle paint_;
+        std::optional<double> lifespan_;
+        bool alive_;
     public:
         brush() {}
         brush(const brush_params& params, const paint_particle& p);
         void apply(canvas& canv, const point& loc, const elapsed_time& t);
+        bool is_alive() const;
+        std::optional<double> lifespan() const;
+        void set_lifespan(double duration);
+        void set_radius(double rad);
     };
 
     inline auto brush_region(const flo::dimensions& dim,

@@ -26,6 +26,7 @@ namespace flo {
     coords to_coords(const point& pt);
     point to_point(const coords& cds);
     rgb_color hex_str_to_rgb(const std::string& hex);
+    double distance(const point& p1, const point& p2);
 
     template <typename T> int sgn(T val) {
         return (T(0) < val) - (val < T(0));

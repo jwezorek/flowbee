@@ -20,7 +20,7 @@ namespace rv = std::ranges::views;
 namespace {
 
     std::random_device rd;
-    std::mt19937 g_generator(rd());
+    std::mt19937 g_generator( rd() );
 
     double normalize(double value, double min, double max) {
         return (value - min) / (max - min);
@@ -234,4 +234,10 @@ flo::rgb_color flo::hex_str_to_rgb(const std::string& hex) {
 
     return color;
 
+}
+
+double flo::distance(const point& p1, const point& p2) {
+    auto x_diff = p1.x - p2.x;
+    auto y_diff = p1.y - p2.y;
+    return std::sqrt(x_diff * x_diff + y_diff * y_diff);
 }
