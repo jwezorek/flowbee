@@ -102,6 +102,17 @@ flo::image flo::to_gray_scale_image(const scalar_field& sf, bool invert) {
     return s.transform_to<uint32_t>(to_grayscale_pixel);
 }
 
+flo::scalar_field flo::to_gray_scale(const image& img) {
+    scalar_field gray(img.cols(), img.rows());
+    for (int y = 0; y < img.rows(); ++y) {
+        for (int x = 0; x < img.cols(); ++x) {
+            rgb_color color = pixel_to_rgb(img[x, y]);
+            gray[x, y] = (0.299 * color.red + 0.587 * color.green + 0.114 * color.blue) / 255.0;
+        }
+    }
+    return gray;
+}
+
 flo::scalar_field flo::white_noise(int wd, int hgt) { 
 
     scalar_field noise(wd, hgt);

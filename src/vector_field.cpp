@@ -9,6 +9,43 @@ namespace rv = std::ranges::views;
 
 namespace {
 
+    flo::matrix<double> gaussian_neighborhood(int sz) {
+        if (sz % 2 == 0) {
+            throw std::invalid_argument("Size must be odd");
+        }
+
+        flo::matrix<double> kernel(sz, sz);
+        double sigma = sz / 3.0; // Standard deviation
+        int half_sz = sz / 2;
+        double sum = 0.0;
+
+        // Compute Gaussian function values
+        for (int y = 0; y < sz; ++y) {
+            for (int x = 0; x < sz; ++x) {
+                if (x == half_sz && y == half_sz) {
+                    kernel[x, y] = 0.0; // Ensure center is zero
+                }
+                else {
+                    double dx = x - half_sz;
+                    double dy = y - half_sz;
+                    kernel[x, y] = std::exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
+                    sum += kernel[x, y];
+                }
+            }
+        }
+
+        // Normalize the kernel so the sum is 1.0
+        if (sum != 0.0) {
+            for (int y = 0; y < sz; ++y) {
+                for (int x = 0; x < sz; ++x) {
+                    kernel[x, y] /= sum;
+                }
+            }
+        }
+
+        return kernel;
+    }
+
     flo::point tangent_of_loxodromic_spiral(
         bool outward,
         double x, double y, double dist, double width, double height, double rho, double theta_rate) {
@@ -192,6 +229,61 @@ flo::vector_field flo::loxodromic_spiral_vector_field(
         yy[x, y] = vec2.y;
     }
     return flo::vector_field(xx, yy);
+}
+
+flo::vector_field flo::gradient(const scalar_field& img, int kernel_sz, bool hamiltonian) {
+    if (kernel_sz % 2 == 0) {
+        throw std::invalid_argument("Kernel size must be odd");
+    }
+
+    int half_sz = kernel_sz / 2;
+    auto kernel = gaussian_neighborhood(kernel_sz);
+    vector_field grad{ scalar_field(img.cols(), img.rows(), 0.0), scalar_field(img.cols(), img.rows(), 0.0) };
+
+    for (int y = 0; y < img.rows(); ++y) {
+        for (int x = 0; x < img.cols(); ++x) {
+            double grad_x = 0.0, grad_y = 0.0;
+            double center_val = img[x, y];
+
+            for (int ky = -half_sz; ky <= half_sz; ++ky) {
+                for (int kx = -half_sz; kx <= half_sz; ++kx) {
+                    int nx = x + kx;
+                    int ny = y + ky;
+                    double neighbor_val = 0.0;
+
+                    if (nx >= 0 && nx < img.cols() && ny >= 0 && ny < img.rows()) {
+                        neighbor_val = img[nx, ny];
+                    }
+
+                    double weight = kernel[kx + half_sz, ky + half_sz];
+                    grad_x += weight * (neighbor_val - center_val) * kx;
+                    grad_y += weight * (neighbor_val - center_val) * ky;
+                }
+            }
+
+            // Normalize gradient to range [-1, 1]
+            double magnitude = std::hypot(grad_x, grad_y);
+            if (magnitude > 0) {
+                grad_x /= magnitude;
+                grad_y /= magnitude;
+            }
+            else {
+                grad_x = 0.0;
+                grad_y = 0.0;
+            }
+
+            if (hamiltonian) {
+                grad.x[x, y] = -grad_y;
+                grad.y[x, y] = grad_x;
+            }
+            else {
+                grad.x[x, y] = grad_x;
+                grad.y[x, y] = grad_y;
+            }
+        }
+    }
+
+    return grad;
 }
 
 flo::vector_field flo::operator*(const point& v, const vector_field& field) {

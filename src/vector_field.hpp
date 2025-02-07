@@ -25,6 +25,7 @@ namespace flo {
     vector_field circular_vector_field(const dimensions& dim, circle_field_type type);
     vector_field loxodromic_spiral_vector_field(const dimensions& dim,
         bool outward, double centers_dist, double theta_rate);
+    vector_field gradient(const scalar_field& img, int kernel_sz, bool hamiltonian);
     vector_field operator*(const point& v, const vector_field& field);
     vector_field operator*(double k, const vector_field& field);
     vector_field operator+(const point& v, const vector_field& field);

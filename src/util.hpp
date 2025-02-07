@@ -14,6 +14,7 @@ namespace flo {
     image img_from_file(const std::string& fname);
     scalar_field normalize(const scalar_field& s);
     image to_gray_scale_image(const scalar_field& sf, bool invert = false);
+    scalar_field to_gray_scale(const image& img);
     scalar_field white_noise(int wd, int hgt);
     scalar_field perlin_noise(const flo::dimensions& sz, uint32_t seed, int octaves, double freq);
     rgb_color random_rgb_color();
