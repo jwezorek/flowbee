@@ -118,20 +118,89 @@ namespace {
             );
         }
     }
+
+    int flowbee_layer(
+        flo::canvas& canvas, const flo::vector_field& flow, const flo::flowbee_params& params) {
+
+        auto dim = canvas.bounds();
+        int iters = 0;
+        double elapsed = 0.0;
+
+        auto palette = params.palette_subset.empty() ?
+            rv::iota(0, canvas.palette_size()) | r::to<std::vector>() :
+            params.palette_subset;
+
+        std::optional<double> total_time;
+        if (params.iterations) {
+            total_time = *params.iterations * params.delta_t;
+        }
+
+        std::vector<paint_glob> particles = rv::iota(0, params.num_particles) | rv::transform(
+            [&](auto)->paint_glob {
+                return random_paint_glob(canvas, params.brush, palette, false, elapsed, total_time);
+            }
+        ) | r::to<std::vector>();
+
+        while (!is_done(canvas, iters, params)) {
+
+            display_progress(iters, canvas, params);
+
+            for (auto& p : particles) {
+                auto loc = p.history.back();
+
+                p.brush.apply(canvas, loc, { params.delta_t, p.elapsed });
+                p.elapsed += params.delta_t;
+
+                flo::point velocity = vector_from_field(flow, loc);
+                loc = loc + params.delta_t * velocity;
+                p.history.push_back(loc);
+                if (p.history.size() > params.max_particle_history) {
+                    p.history.pop_front();
+                }
+            }
+
+            particles = particles | rv::filter(
+                [&](const auto& p) {
+                    auto alive = is_particle_alive(
+                        p, dim, params.max_particle_history, params.dead_particle_area_sz
+                    );
+                    return alive;
+                }
+            ) | r::to<std::vector>();
+
+            while (particles.size() < params.num_particles) {
+                particles.push_back(
+                    random_paint_glob(
+                        canvas, params.brush, palette, params.populate_white_space,
+                        elapsed, total_time
+                    )
+                );
+            }
+
+            ++iters;
+            elapsed += params.delta_t;
+        }
+
+        return iters;
+    }
 }
 
+flo::output_params::output_params(const std::string& fname) :
+    filename{ fname },
+    canvas_color{ 255,255,255 },
+    alpha_threshold(1.0)
+{
+}
 
 flo::flowbee_params::flowbee_params(const brush_params& b, int iters, int n_particles) :
     brush(b),
     particle_volume(1.0),
     max_particle_history(10),
     dead_particle_area_sz(3.0),
-    alpha_threshold(1.0),
     delta_t(1.0),
     iterations(iters),
     num_particles(n_particles),
-    populate_white_space(true),
-    canvas_color{255,255,255}
+    populate_white_space(true)
 {
 }
 
@@ -142,83 +211,40 @@ flo::flowbee_params::flowbee_params(const brush_params& b, int n_particles) :
 }
 
 void flo::do_flowbee(
-        const std::string& outfile_path, const std::vector<flo::rgb_color>& palette, 
+        const output_params& output, const std::vector<flo::rgb_color>& palette,
         const vector_field& flow, const flowbee_params& params) {
 
     flo::canvas canvas(palette, flow.x.bounds());
-    do_flowbee(outfile_path, canvas, flow, params);
-
-}
-
-void flo::do_flowbee(const std::string& outfile_path, const canvas& canv, const vector_field& flow, const flowbee_params& params) {
-    auto canvas = canv;
-    auto dim = canvas.bounds();
-    int iters = 0;
-    double elapsed = 0.0;
-
-    auto palette = params.palette_subset.empty() ?
-        rv::iota(0, canv.palette_size()) | r::to<std::vector>() :
-        params.palette_subset;
-
-    std::optional<double> total_time;
-    if (params.iterations) {
-        total_time = *params.iterations * params.delta_t;
-    }
-
-    std::vector<paint_glob> particles = rv::iota(0, params.num_particles) | rv::transform(
-        [&](auto)->paint_glob {
-            return random_paint_glob(canvas, params.brush, palette, false, elapsed, total_time);
-        }
-    ) | r::to<std::vector>();
-
-    while (!is_done(canvas, iters, params)) {
-
-        display_progress(iters, canvas, params);
-
-        for (auto& p : particles) {
-            auto loc = p.history.back();
-
-            p.brush.apply(canvas, loc, { params.delta_t, p.elapsed });
-            p.elapsed += params.delta_t;
-
-            flo::point velocity = vector_from_field(flow, loc);
-            loc = loc + params.delta_t * velocity;
-            p.history.push_back(loc);
-            if (p.history.size() > params.max_particle_history) {
-                p.history.pop_front();
-            }
-        }
-
-        particles = particles | rv::filter(
-            [&](const auto& p) {
-                auto alive = is_particle_alive(
-                    p, dim, params.max_particle_history, params.dead_particle_area_sz
-                );
-                return alive;
-            }
-        ) | r::to<std::vector>();
-
-        while (particles.size() < params.num_particles) {
-            particles.push_back(
-                random_paint_glob(
-                    canvas, params.brush, palette, params.populate_white_space,
-                    elapsed, total_time
-                )
-            );
-        }
-
-        ++iters;
-        elapsed += params.delta_t;
-    }
+    auto iters = flowbee_layer(canvas, flow, params);
 
     flo::img_to_file(
-        outfile_path,
+        output.filename,
         flo::canvas_to_image(
-            canvas, params.alpha_threshold, params.canvas_color
+            canvas, output.alpha_threshold, output.canvas_color
         )
     );
 
     std::println("\ncomplete.\n(after {} iterations)", iters);
 }
 
+void flo::do_flowbee(
+        const output_params& output,
+        const std::vector<flo::rgb_color>& palette, const std::vector<layer_params>& layers) {
+
+    flo::canvas canvas(palette, layers.front().flow.x.bounds());
+    int iters = 0;
+    for (const auto& [layer_index,layer] : rv::enumerate(layers)) {
+        std::println("layer {}", layer_index + 1);
+        iters += flowbee_layer(canvas, layer.flow, layer.params);
+    }
+
+    flo::img_to_file(
+        output.filename,
+        flo::canvas_to_image(
+            canvas, output.alpha_threshold, output.canvas_color
+        )
+    );
+
+    std::println("\ncomplete.\n(after {} iterations)", iters);
+}
 
