@@ -174,8 +174,8 @@ void flo::mix(canvas& canv, const point& loc, double radius, int aa_level) {
     fill(canv, loc, radius, aa_level, mean_color);
 }
 
-flo::canvas flo::image_to_canvas(const image& img, int n, double vol_per_pixel) {
-    auto palette = top_n_colors(img, n) | rv::transform(pixel_to_rgb) | r::to<std::vector>();
+flo::canvas flo::image_to_canvas(const image& img, const std::vector<rgb_color>& palette, double vol_per_pixel) {
+    int n = static_cast<int>(palette.size());
     canvas canv(palette, img.cols(), img.rows());
     for (auto [x, y] : locations(img.bounds())) {
         auto color = pixel_to_rgb(img[x, y]);
@@ -183,6 +183,11 @@ flo::canvas flo::image_to_canvas(const image& img, int n, double vol_per_pixel) 
         canv.cells()[x, y] = make_one_color_paint(n, palette_index, vol_per_pixel);
     }
     return canv;
+}
+
+flo::canvas flo::image_to_canvas(const image& img, int n, double vol_per_pixel) {
+    auto palette = top_n_colors(img, n) | rv::transform(pixel_to_rgb) | r::to<std::vector>();
+    return image_to_canvas(img, palette, vol_per_pixel);
 }
 
 flo::image flo::canvas_to_image(const canvas& canv, double alpha_threshold,

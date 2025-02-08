@@ -144,9 +144,15 @@ void flo::do_flowbee(
         const std::string& outfile_path, const std::vector<flo::rgb_color>& palette, 
         const vector_field& flow, const flowbee_params& params) {
 
-    auto dim = flow.x.bounds();
-    flo::canvas canvas(palette, dim);
-    int num_colors = static_cast<int>(palette.size());
+    flo::canvas canvas(palette, flow.x.bounds());
+    do_flowbee(outfile_path, canvas, flow, params);
+
+}
+
+void flo::do_flowbee(const std::string& outfile_path, const canvas& canv, const vector_field& flow, const flowbee_params& params) {
+    auto canvas = canv;
+    auto dim = canvas.bounds();
+    int num_colors = canvas.palette_size();
     int iters = 0;
     double elapsed = 0.0;
 
@@ -161,10 +167,10 @@ void flo::do_flowbee(
         }
     ) | r::to<std::vector>();
 
-    while (! is_done(canvas, iters, params)) {
+    while (!is_done(canvas, iters, params)) {
 
         display_progress(iters, canvas, params);
-        
+
         for (auto& p : particles) {
             auto loc = p.history.back();
 
@@ -209,7 +215,6 @@ void flo::do_flowbee(
     );
 
     std::println("\ncomplete.\n(after {} iterations)", iters);
-
 }
 
 

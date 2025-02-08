@@ -32,32 +32,31 @@ int main(int argc, char* argv[]) {
     std::println("flowbee...");
 
     std::vector<flo::rgb_color> palette =
-        std::array<std::string, 5>{ "e63946","f1faee","a8dadc","457b9d","1d3557" } |
+        std::array<std::string, 5>{ "cdb4db","ffc8dd","ffafcc","bde0fe","a2d2ff"  } |
         rv::transform(flo::hex_str_to_rgb) | r::to<std::vector>();
 
-    auto img = flo::to_gray_scale(
-        flo::img_from_file("D:\\test\\myrna.png")
+    auto img = flo::gradient(
+        flo::to_gray_scale(flo::img_from_file("D:\\test\\myrna3.png")), 11, true
     );
 
-    auto flow = flo::gradient(img, 5, true);
+    auto rand = flo::perlin_vector_field(img.x.bounds(), 23232, 45342, 8, 8.0, true);
+    auto flow = flo::normalize(img + 0.25 * rand);
 
     auto params = flo::flowbee_params(
         flo::brush_params{
-            .radius = 3.0,
+            .radius = 4.0,
             .radius_ramp_in_time = 10.0,
             .mix = true,
-            .mode = flo::paint_mode::fill,
+            .mode = flo::paint_mode::overlay,
             .aa_level = 4,
-            .paint_transfer_coeff = 0.55,
+            .paint_transfer_coeff = 0.3
         },
-        50000,
-        300
+        100000,
+        500
     );
 
-    params.dead_particle_area_sz = 25.0;
-
     flo::do_flowbee(
-        "D:\\test\\from_image_notnorm.png",
+        "D:\\test\\test_img.png",
         palette,
         flow,
         params

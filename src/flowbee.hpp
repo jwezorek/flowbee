@@ -32,4 +32,11 @@ namespace flo {
         const flowbee_params& params
     );
 
+    void do_flowbee(
+        const std::string& outfile_path,
+        const canvas& canv,
+        const vector_field& flow,
+        const flowbee_params& params
+    );
+
 }
