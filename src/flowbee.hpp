@@ -20,6 +20,7 @@ namespace flo {
         int num_particles;
         bool populate_white_space;
         rgb_color canvas_color;
+        std::vector<int> palette_subset;
 
         flowbee_params(const brush_params& b, int iters, int n_particles);
         flowbee_params(const brush_params& b, int n_particles);

@@ -32,4 +32,9 @@ namespace flo {
     template <typename T> int sgn(T val) {
         return (T(0) < val) - (val < T(0));
     }
+
+    template <typename T>
+    T random_item(const std::vector<T>& vec) {
+        return vec.at(flo::rand_number(0, static_cast<int>(vec.size() - 1)));
+    }
 }

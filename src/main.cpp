@@ -35,25 +35,24 @@ int main(int argc, char* argv[]) {
         std::array<std::string, 5>{ "cdb4db","ffc8dd","ffafcc","bde0fe","a2d2ff"  } |
         rv::transform(flo::hex_str_to_rgb) | r::to<std::vector>();
 
-    auto img = flo::gradient(
-        flo::to_gray_scale(flo::img_from_file("D:\\test\\myrna3.png")), 11, true
-    );
-
-    auto rand = flo::perlin_vector_field(img.x.bounds(), 23232, 45342, 8, 8.0, true);
-    auto flow = flo::normalize(img + 0.25 * rand);
+    flo::dimensions dim{ 800,800 };
+    auto rand = flo::perlin_vector_field(dim, 23232, 45342, 4, 4.0, true);
+    auto flow = flo::normalize(flo::point{1.5,0} + rand);
 
     auto params = flo::flowbee_params(
         flo::brush_params{
-            .radius = 4.0,
-            .radius_ramp_in_time = 10.0,
+            .radius = 8.0,
+            .radius_ramp_in_time = 50.0,
             .mix = true,
-            .mode = flo::paint_mode::overlay,
+            .mode = flo::paint_mode::fill,
             .aa_level = 4,
-            .paint_transfer_coeff = 0.3
+            .paint_transfer_coeff = 0.6
         },
-        100000,
-        500
+        1000,
+        150
     );
+
+    params.palette_subset = { 0,1,2 };
 
     flo::do_flowbee(
         "D:\\test\\test_img.png",

@@ -53,7 +53,8 @@ namespace {
 
     paint_glob random_paint_glob(
             const flo::canvas& canv,
-            const flo::brush_params& params, int num_colors,
+            const flo::brush_params& params,
+            const std::vector<int> palette,
             bool populate_white_space, double elapsed, 
             std::optional<double> total_time) {
 
@@ -66,7 +67,7 @@ namespace {
         auto brush = flo::brush(
             params,
             flo::make_one_color_paint(
-                num_colors, flo::rand_number(0, num_colors - 1), 1.0
+                canv.palette_size(), flo::random_item(palette), 1.0
             )
         );
 
@@ -152,9 +153,12 @@ void flo::do_flowbee(
 void flo::do_flowbee(const std::string& outfile_path, const canvas& canv, const vector_field& flow, const flowbee_params& params) {
     auto canvas = canv;
     auto dim = canvas.bounds();
-    int num_colors = canvas.palette_size();
     int iters = 0;
     double elapsed = 0.0;
+
+    auto palette = params.palette_subset.empty() ?
+        rv::iota(0, canv.palette_size()) | r::to<std::vector>() :
+        params.palette_subset;
 
     std::optional<double> total_time;
     if (params.iterations) {
@@ -163,7 +167,7 @@ void flo::do_flowbee(const std::string& outfile_path, const canvas& canv, const 
 
     std::vector<paint_glob> particles = rv::iota(0, params.num_particles) | rv::transform(
         [&](auto)->paint_glob {
-            return random_paint_glob(canvas, params.brush, num_colors, false, elapsed, total_time);
+            return random_paint_glob(canvas, params.brush, palette, false, elapsed, total_time);
         }
     ) | r::to<std::vector>();
 
@@ -197,7 +201,7 @@ void flo::do_flowbee(const std::string& outfile_path, const canvas& canv, const 
         while (particles.size() < params.num_particles) {
             particles.push_back(
                 random_paint_glob(
-                    canvas, params.brush, num_colors, params.populate_white_space,
+                    canvas, params.brush, palette, params.populate_white_space,
                     elapsed, total_time
                 )
             );
