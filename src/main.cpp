@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
 
     flo::dimensions dim{ 800,800 };
     auto rand = flo::perlin_vector_field(dim, 4, 4.0, 0.5, true);
-    auto flow = flo::logarithmic_spiral_vector_field( dim, 1.0, false, false );
+    auto flow = flo::logarithmic_spiral_vector_field( dim, 0.25, false, false );
     auto params = flo::flowbee_params(
         flo::brush_params{
             .radius = 8.0,
