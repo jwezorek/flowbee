@@ -119,6 +119,28 @@ namespace {
         }
     }
 
+    void apply_laplacian_diffusion(flo::canvas& canvas, double diffusion_rate) {
+        auto& cells = canvas.cells();
+        auto dims = canvas.bounds();
+
+        flo::matrix<flo::paint_particle> new_cells = cells;
+
+        for (int y = 1; y < dims.hgt - 1; ++y) {
+            for (int x = 1; x < dims.wd - 1; ++x) {
+                // Compute the Laplacian: sum of neighbors minus 4 * center
+                flo::paint_particle laplacian =
+                    cells[x + 1, y] + cells[x - 1, y] +
+                    cells[x, y + 1] + cells[x, y - 1] -
+                    4.0 * cells[x, y];
+
+                // Diffuse paint based on the Laplacian (scaled by diffusion rate)
+                new_cells[x, y] = cells[x, y] + diffusion_rate * laplacian;
+            }
+        }
+
+        cells = std::move(new_cells);
+    }
+
     int flowbee_layer(
         flo::canvas& canvas, const flo::vector_field& flow, const flo::flowbee_params& params) {
 
@@ -175,6 +197,10 @@ namespace {
                         elapsed, total_time
                     )
                 );
+            }
+
+            if (params.diffusion_rate && *params.diffusion_rate > 0.0) {
+                apply_laplacian_diffusion(canvas, *params.diffusion_rate);
             }
 
             ++iters;

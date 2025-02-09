@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
         std::array<std::string, 6>{ "ef476f","f78c6b","ffd166","06d6a0","118ab2","073b4c" } |
         rv::transform(flo::hex_str_to_rgb) | r::to<std::vector>();
 
-    flo::dimensions dim{ 800,800 };
+    flo::dimensions dim{ 400,400 };
     auto rand = flo::perlin_vector_field(dim, 4, 4.0, 0.5, true);
     auto flow = flo::logarithmic_spiral_vector_field( dim, 0.25, false, false );
     auto params = flo::flowbee_params(
@@ -47,11 +47,14 @@ int main(int argc, char* argv[]) {
             .aa_level = 4,
             .paint_transfer_coeff = 0.3
         },
-        150
+        1000,
+        50
     );
 
+    params.diffusion_rate = 0.02;
+
     flo::do_flowbee(
-        { "D:\\test\\test_img.png" },
+        { "D:\\test\\test_img_diffusion.png" },
         palette,
         flow,
         params
