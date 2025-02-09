@@ -82,6 +82,45 @@ namespace {
         return point{ normalized_x, normalized_y };
     }
 
+    flo::point logarithmic_spiral_vector(const flo::dimensions& dim, double x, double y, double b, bool inward, bool clockwise) {
+        // Compute the distance from the center
+        double center_x = dim.wd / 2.0;
+        double center_y = dim.hgt / 2.0;
+        double dx = x - center_x;
+        double dy = y - center_y;
+        double r2 = dx * dx + dy * dy;
+
+        // Avoid division by zero
+        if (r2 < 1e-6) {
+            return { 0.0, 0.0 };
+        }
+
+        // Compute the original gradient components
+        double grad_x = (dx - (dy / b)) / r2;
+        double grad_y = (dy + (dx / b)) / r2;
+
+        // Normalize the vector
+        double magnitude = std::sqrt(grad_x * grad_x + grad_y * grad_y);
+        grad_x /= magnitude;
+        grad_y /= magnitude;
+
+        // Adjust for inward/outward direction
+        if (inward) {
+            grad_x = -grad_x;
+            grad_y = -grad_y;
+        }
+
+        // Adjust for clockwise/counterclockwise rotation
+        if (clockwise) {
+            double temp = grad_x;
+            grad_x = grad_y;
+            grad_y = -temp;
+        }
+
+        return { grad_x, grad_y };
+    }
+
+
     flo::vector_field normalized_vector_field(
         const flo::scalar_field& x_field, const flo::scalar_field& y_field) {
 
@@ -110,11 +149,19 @@ namespace {
 }
 
 flo::vector_field flo::perlin_vector_field(
-    const flo::dimensions& sz, uint32_t seed1, uint32_t seed2,
-    int octaves, double freq, bool normalized) {
+        const flo::dimensions& sz, int octaves, double freq,
+        double exponent, bool normalized) {
 
-    auto x_comp = 2.0 * perlin_noise(sz, seed1, octaves, freq) - 1.0;
-    auto y_comp = 2.0 * perlin_noise(sz, seed2, octaves, freq) - 1.0;
+    auto x_noise = perlin_noise(sz, octaves, freq);
+    auto y_noise = perlin_noise(sz, octaves, freq);
+
+    if (exponent != 1.0) {
+        x_noise = pow(x_noise, exponent);
+        y_noise = pow(y_noise, exponent);
+    }
+
+    auto x_comp = 2.0 * x_noise - 1.0;
+    auto y_comp = 2.0 * y_noise - 1.0;
 
     if (normalized) {
         return normalized_vector_field(x_comp, y_comp);
@@ -216,15 +263,74 @@ flo::vector_field flo::circular_vector_field(const dimensions& dim, circle_field
     };
 }
 
+flo::vector_field flo::elliptic_vector_field(const dimensions& dim, circle_field_type type)
+{
+    scalar_field x_comp(dim);
+    scalar_field y_comp(dim);
+    auto o_x = static_cast<double>(dim.wd) / 2.0;
+    auto o_y = static_cast<double>(dim.hgt) / 2.0;
+
+    // Define the axes of the ellipse
+    double a = o_x;  // Semi-major axis (along the x-direction)
+    double b = o_y;  // Semi-minor axis (along the y-direction)
+
+    for (auto [x, y] : locations(dim)) {
+        auto outward_x = x - o_x;
+        auto outward_y = y - o_y;
+
+        // Apply the ellipse scaling factors (a for x-axis, b for y-axis)
+        auto scale_x = outward_x / a;
+        auto scale_y = outward_y / b;
+
+        auto hypot = std::hypot(scale_x, scale_y);  // Hypotenuse in the scaled ellipse
+        auto outward = (1.0 / hypot) * flo::point{ scale_x, scale_y };
+        point vec;
+
+        switch (type) {
+        case circle_field_type::outward:
+            vec = outward;
+            break;
+        case circle_field_type::inward:
+            vec = -1.0 * outward;
+            break;
+        case circle_field_type::clockwise:
+            vec = rotate_90(outward, true);
+            break;
+        case circle_field_type::counterclockwise:
+            vec = rotate_90(outward, false);
+            break;
+        }
+
+        x_comp[x, y] = vec.x;
+        y_comp[x, y] = vec.y;
+    }
+
+    return {
+        x_comp,
+        y_comp
+    };
+}
+
 flo::vector_field flo::loxodromic_spiral_vector_field(
         const dimensions& dim, bool outward, double centers_dist, double theta_rate) {
-
     auto xx = flo::scalar_field(dim);
     auto yy = flo::scalar_field(dim);
     for (auto [x, y] : flo::locations(dim)) {
         auto vec2 = tangent_of_loxodromic_spiral(
             outward, x, y, centers_dist, dim.wd, dim.hgt, 0.15, theta_rate
         );
+        xx[x, y] = vec2.x;
+        yy[x, y] = vec2.y;
+    }
+    return flo::vector_field(xx, yy);
+}
+
+flo::vector_field flo::logarithmic_spiral_vector_field(
+        const dimensions& dim, double b, bool inward, bool clockwise) {
+    auto xx = flo::scalar_field(dim);
+    auto yy = flo::scalar_field(dim);
+    for (auto [x, y] : flo::locations(dim)) {
+        auto vec2 = logarithmic_spiral_vector(dim, x, y, b, inward, clockwise);
         xx[x, y] = vec2.x;
         yy[x, y] = vec2.y;
     }

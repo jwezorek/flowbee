@@ -33,8 +33,11 @@ namespace {
 
 }
 
-uint32_t flo::rgb_to_pixel(const rgb_color& rgb)
-{
+void flo::set_rand_seed(uint32_t seed) {
+    g_generator = std::mt19937{ seed };
+}
+
+uint32_t flo::rgb_to_pixel(const rgb_color& rgb) {
     return 0xFF000000 | (rgb.blue << 16) | (rgb.green << 8) | rgb.red;
 }
 
@@ -125,10 +128,10 @@ flo::scalar_field flo::white_noise(int wd, int hgt) {
     return noise;
 }
 
-flo::scalar_field flo::perlin_noise(const flo::dimensions& sz, uint32_t seed, int octaves, double freq) {
+flo::scalar_field flo::perlin_noise(const flo::dimensions& sz, int octaves, double freq) {
     auto noise = scalar_field(sz.wd, sz.hgt, 0.0);
 
-    siv::PerlinNoise perlin{ seed };
+    siv::PerlinNoise perlin{ g_generator() };
     auto dim = std::max(sz.wd, sz.hgt);
     double freq_per_pix = freq / dim;
 
