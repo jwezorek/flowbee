@@ -47,8 +47,9 @@ namespace {
     }
 
     flo::point tangent_of_loxodromic_spiral(
-        bool outward,
-        double x, double y, double dist, double width, double height, double rho, double theta_rate) {
+            bool outward,
+            double x, double y, double dist, double width, 
+            double height, double rho, double theta_rate) {
         using namespace flo;
         // Calculate the spiral centers based on provided dimensions and distance
         point center1 = { width / 2.0 - dist / 2.0, height / 2.0 };
@@ -146,6 +147,30 @@ namespace {
             return { -p.y, p.x };  // 90° counterclockwise
         }
     }
+
+    flo::point circular_vector(double x, double y, 
+            const flo::point& center, flo::circle_field_type type) {
+        auto outward_x = x - center.x;
+        auto outward_y = y - center.y;
+        auto hypot = std::hypot(outward_x, outward_y);
+        auto outward = (1.0 / hypot) * flo::point{ outward_x, outward_y };
+        flo::point vec;
+        switch (type) {
+            case flo::circle_field_type::outward:
+                vec = outward;
+                break;
+            case flo::circle_field_type::inward:
+                vec = -1.0 * outward;
+                break;
+            case flo::circle_field_type::clockwise:
+                vec = rotate_90(outward, false);
+                break;
+            case flo::circle_field_type::counterclockwise:
+                vec = rotate_90(outward, true);
+                break;
+        }
+        return vec;
+    }
 }
 
 flo::vector_field flo::perlin_vector_field(
@@ -230,37 +255,18 @@ flo::point flo::vector_from_field(const vector_field& vf, const point& pt) {
 flo::vector_field flo::circular_vector_field(const dimensions& dim, circle_field_type type) {
     scalar_field x_comp(dim);
     scalar_field y_comp(dim);
-    auto o_x = static_cast<double>(dim.wd) / 2.0;
-    auto o_y = static_cast<double>(dim.hgt) / 2.0;
+    auto center = point{
+        static_cast<double>(dim.wd) / 2.0,
+        static_cast<double>(dim.hgt) / 2.0
+    };
 
     for (auto [x, y] : locations(dim)) {
-        auto outward_x = x - o_x;
-        auto outward_y = y - o_y;
-        auto hypot = std::hypot(outward_x, outward_y);
-        auto outward = (1.0 / hypot) * flo::point{ outward_x, outward_y };
-        point vec;
-        switch (type) {
-            case circle_field_type::outward:
-                vec = outward;
-                break;
-            case circle_field_type::inward:
-                vec = -1.0 * outward;
-                break;
-            case circle_field_type::clockwise:
-                vec = rotate_90(outward, true);
-                break;
-            case circle_field_type::counterclockwise:
-                vec = rotate_90(outward, false);
-                break;
-        }
+        auto vec = circular_vector(x, y, center, type);
         x_comp[x, y] = vec.x;
         y_comp[x, y] = vec.y;
     }
 
-    return {
-        x_comp,
-        y_comp
-    };
+    return { x_comp, y_comp  };
 }
 
 flo::vector_field flo::elliptic_vector_field(const dimensions& dim, circle_field_type type)
@@ -335,6 +341,50 @@ flo::vector_field flo::logarithmic_spiral_vector_field(
         yy[x, y] = vec2.y;
     }
     return flo::vector_field(xx, yy);
+}
+
+flo::vector_field flo::zigzag_vector_field(const flo::dimensions& dim, double radius) {
+    flo::scalar_field x_comp(dim);
+    flo::scalar_field y_comp(dim);
+
+    flo::dimensions circle_dim{ static_cast<int>(2 * radius), static_cast<int>(2 * radius) };
+    auto circular_field = flo::circular_vector_field(circle_dim, flo::circle_field_type::counterclockwise);
+
+    for (auto [x, y] : flo::locations(dim)) {
+        int row = y / static_cast<int>(radius);
+        bool rightward = (row % 2 == 0);
+        double left_boundary = radius;
+        double right_boundary = dim.wd - radius;
+
+        if (x > left_boundary && x < right_boundary) {
+            x_comp[x, y] = rightward ? 1.0 : -1.0;
+            y_comp[x, y] = 0.0;
+            continue;
+        }
+
+        if (x == 950 && y == 50) {
+            int aaa;
+            aaa = 5;
+        }
+
+        circle_field_type orientation;
+        int center_row;
+        double cen_x;
+        if (x >= right_boundary) {
+            center_row = row % 2 == 0 ? row + 1 : row;
+            cen_x = right_boundary,
+            orientation = flo::circle_field_type::clockwise;
+        } else {
+            center_row = row % 2 == 0 ? row : row + 1;
+            cen_x = left_boundary;
+            orientation = flo::circle_field_type::counterclockwise;
+        }
+        auto vec = circular_vector(x, y, { cen_x, center_row * radius }, orientation);
+        x_comp[x, y] = vec.x;
+        y_comp[x, y] = vec.y;
+    }
+
+    return { x_comp, y_comp };
 }
 
 flo::vector_field flo::gradient(const scalar_field& img, int kernel_sz, bool hamiltonian) {

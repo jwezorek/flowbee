@@ -28,6 +28,7 @@ namespace flo {
         bool outward, double centers_dist, double theta_rate);
     vector_field logarithmic_spiral_vector_field(
         const dimensions& dim, double b, bool inward, bool clockwise);
+    vector_field zigzag_vector_field(const dimensions& dim, double radius);
     vector_field gradient(const scalar_field& img, int kernel_sz, bool hamiltonian);
     vector_field operator*(const point& v, const vector_field& field);
     vector_field operator*(double k, const vector_field& field);

@@ -199,11 +199,6 @@ flo::image flo::canvas_to_image(const canvas& canv, double alpha_threshold,
         auto volume = canv.cells()[x, y].volume();
         if (alpha_threshold > 0.0) {
             auto alpha = (volume >= alpha_threshold) ? 1.0 : volume / alpha_threshold;
-            if (std::isnan(alpha)) {
-                auto& test = canv.cells()[x, y];
-                int aaa;
-                aaa = 5;
-            }
             pigment = mix_pigments(bkgd, (1.0 - alpha), pigment, alpha);
         }
         img[x, y] = rgb_to_pixel(pigment_to_rgb(pigment));
