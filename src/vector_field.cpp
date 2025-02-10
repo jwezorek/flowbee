@@ -344,11 +344,9 @@ flo::vector_field flo::logarithmic_spiral_vector_field(
 }
 
 flo::vector_field flo::zigzag_vector_field(const flo::dimensions& dim, double radius) {
+
     flo::scalar_field x_comp(dim);
     flo::scalar_field y_comp(dim);
-
-    flo::dimensions circle_dim{ static_cast<int>(2 * radius), static_cast<int>(2 * radius) };
-    auto circular_field = flo::circular_vector_field(circle_dim, flo::circle_field_type::counterclockwise);
 
     for (auto [x, y] : flo::locations(dim)) {
         int row = y / static_cast<int>(radius);
@@ -360,11 +358,6 @@ flo::vector_field flo::zigzag_vector_field(const flo::dimensions& dim, double ra
             x_comp[x, y] = rightward ? 1.0 : -1.0;
             y_comp[x, y] = 0.0;
             continue;
-        }
-
-        if (x == 950 && y == 50) {
-            int aaa;
-            aaa = 5;
         }
 
         circle_field_type orientation;

@@ -18,6 +18,11 @@ namespace flo {
         output_params(const std::string& fname);
     };
 
+    struct jitter_params {
+        double weight;
+        double stddev;
+    };
+
     struct flowbee_params {
         brush_params brush;
         double particle_volume;
@@ -29,6 +34,7 @@ namespace flo {
         bool populate_white_space;
         std::vector<int> palette_subset; 
         std::optional<double> diffusion_rate;
+        std::optional<jitter_params> jitter;
 
         flowbee_params(const brush_params& b, int iters, int n_particles);
         flowbee_params(const brush_params& b, int n_particles);

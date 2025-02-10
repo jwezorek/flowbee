@@ -44,11 +44,13 @@ int main(int argc, char* argv[]) {
 
     auto start_time = std::chrono::high_resolution_clock::now();
 
+    flo::set_rand_seed(2384);
+
     std::vector<flo::rgb_color> palette =
         std::array<std::string, 6>{ "ef476f","f78c6b","ffd166","06d6a0","118ab2","073b4c" } |
         rv::transform(flo::hex_str_to_rgb) | r::to<std::vector>();
 
-    flo::dimensions dim{ 1500,900 };
+    flo::dimensions dim{ 1200,900};
     auto rand = flo::perlin_vector_field(dim, 4, 4.0, 0.5, true);
     //auto flow = flo::logarithmic_spiral_vector_field( dim, 0.25, false, false );
     auto flow = flo::zigzag_vector_field(dim, 150);
@@ -64,7 +66,7 @@ int main(int argc, char* argv[]) {
         },
         50
     );
-
+    params.jitter = { 1.0, std::numbers::pi / 10.0 };
 
     flo::do_flowbee(
         { "D:\\test\\test_zigzag.png" },

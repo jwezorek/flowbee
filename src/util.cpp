@@ -255,3 +255,11 @@ double flo::distance(const point& p1, const point& p2) {
     auto y_diff = p1.y - p2.y;
     return std::sqrt(x_diff * x_diff + y_diff * y_diff);
 }
+
+flo::point flo::normalize(const point& pt) {
+    auto magnitude = std::hypot(pt.x, pt.y);
+    if (magnitude == 0.0) {
+        return pt;
+    }
+    return (1.0 / magnitude) * pt;
+}

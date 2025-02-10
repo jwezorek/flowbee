@@ -144,6 +144,22 @@ namespace {
         cells = std::move(new_cells);
     }
 
+    flo::point position_delta(
+            const flo::point& loc, const flo::vector_field& flow, double delta_t,
+            const std::optional<flo::jitter_params>& jitter) {
+        flo::point velocity = vector_from_field(flow, loc);
+        if (jitter) {
+            auto flow_theta = std::atan2(velocity.y, velocity.x);
+            auto jitter_theta = flo::normal_rand(0.0, jitter->stddev);
+            auto theta = flow_theta + jitter->weight * jitter_theta;
+            velocity = {
+                std::cos(theta),
+                std::sin(theta)
+            };
+        }
+        return delta_t * velocity;
+    }
+
     int flowbee_layer(
         flo::canvas& canvas, const flo::vector_field& flow, const flo::flowbee_params& params) {
 
@@ -175,9 +191,8 @@ namespace {
 
                 p.brush.apply(canvas, loc, { params.delta_t, p.elapsed });
                 p.elapsed += params.delta_t;
-
-                flo::point velocity = vector_from_field(flow, loc);
-                loc = loc + params.delta_t * velocity;
+                
+                loc = loc + position_delta(loc, flow, params.delta_t, params.jitter);
                 p.history.push_back(loc);
                 if (p.history.size() > params.max_particle_history) {
                     p.history.pop_front();
