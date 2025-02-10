@@ -108,12 +108,15 @@ namespace {
     }
 
     void display_progress(int iters, const flo::canvas& canv, const flo::flowbee_params& params) {
+        if (iters == 0) {
+            std::print("  ");
+        }
         iters++;
         if (iters % 50 == 0) {
             std::print(".");
         }
         if (iters > 0 && iters % 500 == 0) {
-            std::println(" {:.4f}%",
+            std::print(" {:.4f}%\n  ",
                 100.0 * pcnt_done(canv, iters, params)
             );
         }
@@ -206,7 +209,7 @@ namespace {
             ++iters;
             elapsed += params.delta_t;
         }
-
+        std::println("");
         return iters;
     }
 }
@@ -250,7 +253,7 @@ void flo::do_flowbee(
         )
     );
 
-    std::println("\ncomplete.\n(after {} iterations)", iters);
+    std::println("\n    complete.\n    {} iterations", iters);
 }
 
 void flo::do_flowbee(
