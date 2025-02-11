@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <format>
 #include <random>
+#include <print>
 #include <stdexcept>
 
 namespace fs = std::filesystem;
@@ -31,6 +32,25 @@ namespace {
         return 0xFF000000 | (gray << 16) | (gray << 8) | gray;
     }
 
+}
+
+void flo::display_title() {
+    std::string ascii_art = R"(
+               __ _               _               
+              / _| |             | |              
+             | |_| | _____      _| |__   ___  ___ 
+             |  _| |/ _ \ \ /\ / / '_ \ / _ \/ _ \
+             | | | | (_) \ V  V /| |_) |  __/  __/
+             |_| |_|\___/ \_/\_/ |_.__/ \___|\___|
+
+        )";
+    std::println("{}",
+        ascii_art | std::views::split('\n') | rv::transform(
+                [](auto&& line) { 
+                    return line | rv::drop(12);
+            }
+        ) | rv::join_with('\n') | r::to<std::string>()
+    );
 }
 
 void flo::set_rand_seed(uint32_t seed) {

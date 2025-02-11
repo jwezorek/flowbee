@@ -19,6 +19,7 @@ add_executable(flowbee
     src/pigment.cpp
     src/vector_field.cpp
     src/flowbee.cpp
+    src/input.cpp
 )
 
 set_target_properties(${BUILD_TARGET} PROPERTIES LINK_FLAGS "/PROFILE")

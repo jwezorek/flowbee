@@ -7,7 +7,7 @@
 /*------------------------------------------------------------------------------------------------*/
 
 namespace flo {
-
+    void display_title();
     void set_rand_seed(uint32_t seed);
     uint32_t rgb_to_pixel(const rgb_color& rgb);
     rgb_color pixel_to_rgb(uint32_t pix);

@@ -229,12 +229,14 @@ namespace {
     }
 }
 
+/*
 flo::output_params::output_params(const std::string& fname) :
     filename{ fname },
     canvas_color{ 255,255,255 },
     alpha_threshold(1.0)
 {
 }
+*/
 
 flo::flowbee_params::flowbee_params(const brush_params& b, int iters, int n_particles) :
     brush(b),
@@ -275,10 +277,16 @@ void flo::do_flowbee(
         const output_params& output,
         const std::vector<flo::rgb_color>& palette, const std::vector<layer_params>& layers) {
 
+    if (layers.size() == 1) {
+        const auto& layer = layers.front();
+        do_flowbee(output, palette, layer.flow, layer.params);
+        return;
+    }
+
     flo::canvas canvas(palette, layers.front().flow.x.bounds());
     int iters = 0;
     for (const auto& [layer_index,layer] : rv::enumerate(layers)) {
-        std::println("layer {}", layer_index + 1);
+        std::println(" - layer {} -", layer_index + 1);
         iters += flowbee_layer(canvas, layer.flow, layer.params);
     }
 

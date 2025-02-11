@@ -14,8 +14,6 @@ namespace flo {
         std::string filename;
         rgb_color canvas_color;
         double alpha_threshold;
-
-        output_params(const std::string& fname);
     };
 
     struct jitter_params {
@@ -35,9 +33,8 @@ namespace flo {
         std::vector<int> palette_subset; 
         std::optional<double> diffusion_rate;
         std::optional<jitter_params> jitter;
-
         flowbee_params(const brush_params& b, int iters, int n_particles);
-        flowbee_params(const brush_params& b, int n_particles);
+        flowbee_params(const brush_params& b = {}, int n_particles = 0);
     };
 
     struct layer_params {
