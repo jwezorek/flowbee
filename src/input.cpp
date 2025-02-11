@@ -55,54 +55,121 @@ namespace {
     const std::string k_layers = "layers";
     const std::string k_flow = "flow";
     const std::string k_params = "params";
+    const std::string k_type = "type";
+    const std::string k_inward = "inward";
+    const std::string k_outward = "outward";
+    const std::string k_clockwise = "clockwise";
+    const std::string k_counterclockwise = "counterclockwise";
+    const std::string k_centers_dist = "centers_dist";
+    const std::string k_theta_rate = "theta_rate";
+    const std::string k_growth_rate = "growth_rate";
+    const std::string k_circular = "circular";
+    const std::string k_elliptic = "elliptic";
+    const std::string k_loxo_spiral = "loxo_spiral";
+    const std::string k_log_spiral = "log_spiral";
 
+    flo::vector_field vector_field_from_json_aux(const flo::dimensions& dim, const json& json_obj);
 
+    flo::circle_field_type parse_circle_field_type(const json& json_value) {
+        if (!json_value.is_string()) {
+            throw std::invalid_argument("Expected a string for circle_field_type");
+        }
+
+        std::string mode_str = json_value.get<std::string>();
+
+        if (mode_str == k_inward) {
+            return flo::circle_field_type::inward;
+        } else if (mode_str == k_outward) {
+            return flo::circle_field_type::outward;
+        } else if (mode_str == k_clockwise) {
+            return flo::circle_field_type::clockwise;
+        } else if (mode_str == k_counterclockwise) {
+            return flo::circle_field_type::counterclockwise;
+        } else {
+            throw std::invalid_argument("Invalid circle_field_type: " + mode_str);
+        }
+    }
+
+    flo::vector_field perlin_field_fn(const flo::dimensions& dim, const json& node) {
+        return perlin_vector_field(dim, node[k_octaves], node[k_freq],
+            node.value(k_exponent, 1.0), node.value(k_normalized, true));
+    }
+
+    flo::vector_field zigzag_field_fn(const flo::dimensions& dim, const json& node) {
+        return zigzag_vector_field(dim, node[k_radius]);
+    }
+
+    flo::vector_field normalize_field_fn(const flo::dimensions& dim, const json& node) {
+        return normalize(vector_field_from_json_aux(dim, node[k_arg]));
+    }
+
+    flo::vector_field multiply_field_fn(const flo::dimensions& dim, const json& node) {
+        if (node[k_arg1].is_array()) {
+            flo::point v{ node[k_arg1][0], node[k_arg1][1] };
+            return v * vector_field_from_json_aux(dim, node[k_arg2]);
+        }
+        else {
+            double scalar = node[k_arg1];
+            return scalar * vector_field_from_json_aux(dim, node[k_arg2]);
+        }
+    }
+
+    flo::vector_field add_field_fn(const flo::dimensions& dim, const json& node) {
+        if (node[k_arg1].is_array()) {
+            flo::point v{ node[k_arg1][0], node[k_arg1][1] };
+            return v + vector_field_from_json_aux(dim, node[k_arg2]);
+        } else if (node[k_arg2].is_array()) {
+            flo::point v{ node[k_arg2][0], node[k_arg2][1] };
+            return v + vector_field_from_json_aux(dim, node[k_arg1]);
+        } else if (node[k_arg1].is_number()) {
+            double k = node[k_arg1];
+            return k + vector_field_from_json_aux(dim, node[k_arg2]);
+        } else {
+            return vector_field_from_json_aux(dim, node[k_arg1]) +
+                vector_field_from_json_aux(dim, node[k_arg2]);
+        }
+    }
+
+    flo::vector_field circular_field_fn(const flo::dimensions& dim, const json& node) {
+        return circular_vector_field(dim, parse_circle_field_type(node[k_type]));
+    }
+
+    flo::vector_field elliptic_field_fn(const flo::dimensions& dim, const json& node) {
+        return elliptic_vector_field(dim, parse_circle_field_type(node[k_type]));
+    }
+
+    /*
+    flo::vector_field loxo_spiral_field_fn(const flo::dimensions& dim, const json& node) {
+        return loxodromic_spiral_vector_field(
+            dim, node[k_outward], node[k_centers_dist], node[k_theta_rate]
+        );
+    }
+
+    flo::vector_field log_spiral_field_fn(const flo::dimensions& dim, const json& node) {
+        return logarithmic_spiral_vector_field(dim, node[k_growth_rate], node[k_inward], node[k_theta_offset]);
+    }
+    */
 
     flo::vector_field vector_field_from_json_aux(const flo::dimensions& dim, const json& json_obj) {
-
         using namespace flo;
-        using vector_field_fn = 
-            std::function<flo::vector_field(const dimensions&, const json&)>;
+        using vector_field_fn = std::function<flo::vector_field(const dimensions&, const json&)>;
 
         static const std::unordered_map<std::string, vector_field_fn> operations = {
-            {k_perlin, [](const flo::dimensions& dim,const json& node) {
-                return perlin_vector_field(dim, node[k_octaves], node[k_freq],
-                    node.value(k_exponent, 1.0), node.value(k_normalized, true));
-            }},
-            {k_zigzag, [](const flo::dimensions& dim,const json& node) {
-                return zigzag_vector_field(dim, node[k_radius]);
-            }},
-            {k_normalize, [](const flo::dimensions& dim,const json& node) {
-                return normalize(vector_field_from_json_aux(dim, node[k_arg]));
-            }},
-            {k_multiply, [](const flo::dimensions& dim, const json& node) {
-                if (node[k_arg1].is_array()) {
-                    point v{ node[k_arg1][0], node[k_arg1][1] };
-                    return v * vector_field_from_json_aux(dim, node[k_arg2]);
-                } else {
-                    double scalar = node[k_arg1];
-                    return scalar * vector_field_from_json_aux(dim, node[k_arg2]);
-                }
-            }},
-            {k_add, [](const flo::dimensions& dim,const json& node) {
-                if (node[k_arg1].is_array()) {
-                    point v{ node[k_arg1][0], node[k_arg1][1] };
-                    return v + vector_field_from_json_aux(dim, node[k_arg2]);
-                } else if (node[k_arg2].is_array()) {
-                    point v{ node[k_arg2][0], node[k_arg2][1] };
-                    return v + vector_field_from_json_aux(dim, node[k_arg1]);
-                } else if (node[k_arg1].is_number()) {
-                    double k = node[k_arg1];
-                    return k + vector_field_from_json_aux(dim, node[k_arg2]);
-                } else {
-                    return vector_field_from_json_aux(dim, node[k_arg1]) +
-                         vector_field_from_json_aux(dim, node[k_arg2]);
-                }
-            }}
+            {k_perlin, perlin_field_fn},
+            {k_zigzag, zigzag_field_fn},
+            {k_normalize, normalize_field_fn},
+            {k_multiply, multiply_field_fn},
+            {k_add, add_field_fn},
+            {k_circular, circular_field_fn},
+            {k_elliptic, elliptic_field_fn},
+            //{k_loxo_spiral, loxo_spiral_field_fn},
+            //{k_log_spiral, log_spiral_field_fn}
         };
+
         const auto& fn = operations.at(json_obj[k_op].get<std::string>());
         return fn(dim, json_obj);
     }
+
 
     flo::vector_field vector_field_from_json(const json& json_obj) {
         using namespace flo;

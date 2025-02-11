@@ -8,7 +8,7 @@
 #include "input.hpp"
 #include <iostream>
 #include <vector>
-#include <functional>
+#include <filesystem>
 #include <string>
 #include <print>
 #include <ranges>
@@ -19,6 +19,13 @@
 #include <chrono>
 
 /*------------------------------------------------------------------------------------------------*/
+namespace {
+
+    std::string filename(const std::string& str) {
+        return std::filesystem::path(str).filename().string();
+    }
+
+}
 
 int main(int argc, char* argv[]) {
 
@@ -38,6 +45,8 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    std::println("  processing '{}'...\n", filename(argv[1]));
+
     auto start_time = std::chrono::high_resolution_clock::now();
 
     if (input->rand_seed) {
@@ -52,7 +61,8 @@ int main(int argc, char* argv[]) {
 
     auto end_time = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end_time - start_time;
-    std::println("    {} seconds", elapsed.count());
+    std::println("    {} seconds\n", elapsed.count());
+    std::println("  generated '{}'.", filename(input->output.filename));
 
     return 0;
 }
