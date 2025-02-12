@@ -1,5 +1,5 @@
 {
-    "palette": ["ffffff", "ef476f","f78c6b","ffd166","06d6a0","118ab2","073b4c"],
+    "palette": [ "f1faee", "a8dadc", "457b9d", "1d3557" ],
     "layers": [
         {
             "flow": {
@@ -10,8 +10,10 @@
                     "arg": {
                         "op": "add",
                         "arg1": {
-						                "op": "circular",
-						                "type" : "clockwise"
+						                "op": "log_spiral",
+                            "growth_rate": 2.0,
+                            "inward": false,
+                            "clockwise" :  true
 						            },
                         "arg2": {
                             "op": "multiply",
@@ -40,7 +42,7 @@
                 "max_particle_history": 10,
                 "dead_particle_area_sz": 3,
                 "delta_t": 1.0,
-				"iterations": 12000,
+				        "iterations": 12000,
                 "num_particles": 50,
                 "populate_white_space": true
             }

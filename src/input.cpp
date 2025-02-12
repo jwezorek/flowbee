@@ -1,4 +1,5 @@
 #include "input.hpp"
+#include "vector_field.hpp"
 #include "third-party/json.hpp"
 #include <fstream>
 #include <string_view>
@@ -138,7 +139,6 @@ namespace {
         return elliptic_vector_field(dim, parse_circle_field_type(node[k_type]));
     }
 
-    /*
     flo::vector_field loxo_spiral_field_fn(const flo::dimensions& dim, const json& node) {
         return loxodromic_spiral_vector_field(
             dim, node[k_outward], node[k_centers_dist], node[k_theta_rate]
@@ -146,9 +146,8 @@ namespace {
     }
 
     flo::vector_field log_spiral_field_fn(const flo::dimensions& dim, const json& node) {
-        return logarithmic_spiral_vector_field(dim, node[k_growth_rate], node[k_inward], node[k_theta_offset]);
+        return logarithmic_spiral_vector_field(dim, node[k_growth_rate], node[k_inward], node[k_clockwise]);
     }
-    */
 
     flo::vector_field vector_field_from_json_aux(const flo::dimensions& dim, const json& json_obj) {
         using namespace flo;
@@ -162,8 +161,8 @@ namespace {
             {k_add, add_field_fn},
             {k_circular, circular_field_fn},
             {k_elliptic, elliptic_field_fn},
-            //{k_loxo_spiral, loxo_spiral_field_fn},
-            //{k_log_spiral, log_spiral_field_fn}
+            {k_loxo_spiral, loxo_spiral_field_fn},
+            {k_log_spiral, log_spiral_field_fn}
         };
 
         const auto& fn = operations.at(json_obj[k_op].get<std::string>());
