@@ -10,9 +10,9 @@
                     "arg": {
                         "op": "add",
                         "arg1": {
-						                "op": "circular",
-						                "type" : "clockwise"
-						            },
+                            "op": "circular",
+                            "type" : "clockwise"
+                        },
                         "arg2": {
                             "op": "multiply",
                             "arg1": 0.25,
