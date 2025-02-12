@@ -1,6 +1,9 @@
+
+![perturbed_spiral](https://github.com/user-attachments/assets/ab74148f-91a3-4846-ace9-4587ab0f3353)
+
 # Flowbee
 
-Flowbee is a tool for generating images of paint particles moving in vector fields, mixing in a semi-realistic manner. It simulates the movement of particles in a flow field, allowing for the creation of intricate, swirling patterns that resemble natural paint mixing and dispersion. Flowbee provides a high degree of control over brush settings, paint behavior, and particle dynamics, making it a powerful tool for generative art and computational painting.
+Flowbee is a tool for generating images of paint particles moving in vector fields, mixing in a semi-realistic manner. 
 
 ## Usage
 
@@ -14,7 +17,7 @@ Flowbee supports any image format compatible with stb-image-write, such as PNG, 
 
 ## Example JSON Configuration
 
-The following JSON file defines a generative artwork setup with a structured flow field, color palette, and paint simulation settings:
+The following JSON file generates the image above:
 
 ```json
 {
@@ -73,9 +76,9 @@ The following JSON file defines a generative artwork setup with a structured flo
 
 - **Palette**: Defines the color set used in the artwork. Colors are specified in hexadecimal format.
 - **Layers**: Each layer has its own flow field and paint simulation settings.
-  - **Flow**: Defines the vector field used to guide paint particles.
-    - **op: vector\_field**: Specifies that a vector field is being used.
-    - **dimensions**: The size of the field.
+  - **Flow**: Defines the vector field used to guide paint particles. The following is for example purposes. There are more vecotr field primitives. Look in the example JSON files in the repo to see what else is possible.
+    - **op: vector\_field**: Top-level vector field.
+    - **dimensions**: The size of the field. Only needed on the top-level.
     - **def**: Defines how the field is generated.
       - A log spiral field is combined with Perlin noise to create a dynamic vector field.
       - The spiral has a growth rate of 2.0, is outward-expanding, and rotates clockwise.
@@ -83,32 +86,18 @@ The following JSON file defines a generative artwork setup with a structured flo
   - **Params**: Defines the brush and particle behavior.
     - **Brush**:
       - `radius`: Defines the brush size.
-      - `mix`: Enables color mixing.
-      - `mode`: Determines how paint is applied ("fill" mode used here).
-      - `radius_ramp_in_time`: Time steps over which the brush radius changes.
-      - `aa_level`: Anti-aliasing level for smoother results.
-      - `paint_transfer_coeff`: Controls how much paint transfers between particles and the canvas.
+      - `mix`: Enables color mixing. If this is false the color of the brush is not affected by paint on the canvas.
+      - `mode`: Determines how paint is applied ("fill" mode used here; the other options are "overlay" and "mix".).
+      - `radius_ramp_in_time`: Time steps over which the brush radius changes starting from one pixel.
+      - `aa_level`: Anti-aliasing level. Valid options are [0...4]. 0 means no anti-aliasing. 4 means 256 distinct values.
+      - `paint_transfer_coeff`: Controls how much paint transfers between particles and the canvas, needs to be in the range [0 ... 1.0].
     - **Particle Parameters**:
-      - `particle_volume`: The total volume of paint particles.
-      - `max_particle_history`: The maximum number of steps a particle persists before being reset.
-      - `dead_particle_area_sz`: The size of areas where particles stop moving.
+      - `particle_volume`: Volume of the paint at each pixel on the canvas. In practice this only matter when using the "overlay" brush mode.
+      - `max_particle_history`: The maximum number of steps a retained by each particle to test for particle death.
+      - `dead_particle_area_sz`: The minumum size of largest dimension of the bounds of the particle's history such that the particle is considered to still be moving and thus is not pruned. 
       - `delta_t`: Simulation timestep.
-      - `num_particles`: The number of particles in the system.
-      - `populate_white_space`: Ensures that unpainted regions are filled dynamically.
-
-## Running the Example
-
-Save the above JSON into a file (e.g., `example.json`) and execute:
-
-```sh
-flowbee example.json output.png
-```
-
-Flowbee will generate an image based on the specified parameters and save it to `output.png`.
-
-## Customization
-
-Modify the JSON parameters to experiment with different vector fields, brush settings, and particle behaviors. Combining different flow field operations and adjusting paint properties allows for unique generative artworks.
+      - `num_particles`: The number of particles in the system. When particles die, more are generated such that there are always 'num_particles'.
+      - `populate_white_space`: Ensures that unpainted regions are populated first when spawning new particles.
 
 ## License
 
