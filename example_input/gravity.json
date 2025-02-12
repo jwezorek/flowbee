@@ -1,0 +1,43 @@
+{
+  "palette": [ "00296b", "003f88", "00509d", "fdc500", "ffd500" ],
+    "layers": [
+        {
+            "flow": {
+                "op": "vector_field",
+                "dimensions": [1000, 1000],
+                "def": {
+                    "op": "gravity",
+                    "masses": [
+                        {
+                          "mass": 1.0,
+                          "loc": [ 500.0, 1000 ]
+                        },
+                        {
+                          "mass": 1.0,
+                          "loc": [ 66.98729810778059, 250.0 ]
+                        },
+                        {
+                          "mass": 1.0,
+                          "loc": [ 933.0127018922192, 250.0 ]
+                        }
+                    ]
+                }
+            },
+            "params": {
+                "brush": {
+                    "radius" : 10.0,
+                    "mix" : true,
+                    "mode" : "overlay",
+                    "aa_level" : 4,
+                    "paint_transfer_coeff" : 0.35
+                },
+                "particle_volume": 1.0,
+                "max_particle_history": 30,
+                "dead_particle_area_sz": 2,
+                "delta_t": 1.0,
+                "num_particles": 50,
+                "populate_white_space": true
+            }
+        }
+    ]
+}

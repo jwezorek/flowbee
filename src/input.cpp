@@ -68,6 +68,11 @@ namespace {
     const std::string k_elliptic = "elliptic";
     const std::string k_loxo_spiral = "loxo_spiral";
     const std::string k_log_spiral = "log_spiral";
+    const std::string k_mass = "mass";
+    const std::string k_loc = "loc";
+    const std::string k_gravity = "gravity";
+    const std::string k_masses = "masses";
+    const std::string k_grav_const = "grav_const";
 
     flo::vector_field vector_field_from_json_aux(const flo::dimensions& dim, const json& json_obj);
 
@@ -149,6 +154,35 @@ namespace {
         return logarithmic_spiral_vector_field(dim, node[k_growth_rate], node[k_inward], node[k_clockwise]);
     }
 
+    std::vector<flo::point_mass> to_point_mass_array(const json& jobj) {
+        std::vector<flo::point_mass> result;
+
+        for (const auto& item : jobj) {
+            if (!item.contains(k_mass) || !item.contains(k_loc) ||
+                    !item[k_loc].is_array() || item[k_loc].size() != 2) {
+                throw std::runtime_error("Invalid JSON format for point_mass");
+            }
+
+            flo::point_mass pm;
+            pm.mass = item[k_mass].get<double>();
+            pm.loc.x = item[k_loc][0].get<double>();
+            pm.loc.y = item[k_loc][1].get<double>();
+
+            result.push_back(pm);
+        }
+
+        return result;
+    }
+    
+    flo::vector_field gravity_field_fn(const flo::dimensions& dim, const json& node) {
+        return gravity(
+            dim,
+            to_point_mass_array(node[k_masses]),
+            (node.contains(k_grav_const)) ? node[k_grav_const].get<double>() : 1.0,
+            (node.contains(k_normalize)) ? node[k_normalize].get<bool>() : true
+        );
+    }
+
     flo::vector_field vector_field_from_json_aux(const flo::dimensions& dim, const json& json_obj) {
         using namespace flo;
         using vector_field_fn = std::function<flo::vector_field(const dimensions&, const json&)>;
@@ -162,7 +196,8 @@ namespace {
             {k_circular, circular_field_fn},
             {k_elliptic, elliptic_field_fn},
             {k_loxo_spiral, loxo_spiral_field_fn},
-            {k_log_spiral, log_spiral_field_fn}
+            {k_log_spiral, log_spiral_field_fn},
+            {k_gravity, gravity_field_fn}
         };
 
         const auto& fn = operations.at(json_obj[k_op].get<std::string>());

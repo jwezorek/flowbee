@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < argc; ++i) {
             std::println("{} ", argv[i]);
         }
-        std::println(" usage is 'flowbee.exe params.json output_iamge.png'");
+        std::println(" usage is 'flowbee.exe params.json output_image.png'");
         return -1;
     }
 
