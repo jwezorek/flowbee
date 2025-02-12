@@ -29,12 +29,12 @@
             },
             "params": {
                 "brush": {
-					"radius" : 10.0,
-					"mix" : true,
+                    "radius" : 10.0,
+                    "mix" : true,
                     "mode" : "fill",
-					"radius_ramp_in_time" : 200,
-					"aa_level" : 4,
-					"paint_transfer_coeff" : 0.6
+                    "radius_ramp_in_time" : 200,
+                    "aa_level" : 4,
+                    "paint_transfer_coeff" : 0.6
                 },
                 "particle_volume": 1.0,
                 "max_particle_history": 10,
