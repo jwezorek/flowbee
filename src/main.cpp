@@ -29,17 +29,17 @@ namespace {
 
 int main(int argc, char* argv[]) {
 
-    if (argc != 2) {
+    if (argc != 3) {
         for (int i = 0; i < argc; ++i) {
             std::println("{} ", argv[i]);
         }
-        std::println(" usage is 'flowbee.exe params.json'");
+        std::println(" usage is 'flowbee.exe params.json output_iamge.png'");
         return -1;
     }
 
     flo::display_title();
 
-    auto input = flo::parse_input( argv[1] );
+    auto input = flo::parse_input( argv[1], argv[2] );
     if (!input) {
         std::println("[error] {}", input.error());
         return -1;

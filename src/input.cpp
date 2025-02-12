@@ -178,14 +178,20 @@ namespace {
         return vector_field_from_json_aux(dim, def);
     }
 
-    flo::output_params parse_output_params(const json& j) {
-        return {
-            j[k_filename].get<std::string>(),
-            j.contains(k_canvas_color) ?
-                flo::hex_str_to_rgb(j[k_canvas_color].get<std::string>()) :
-                flo::hex_str_to_rgb("#ffffff"),
-            j.value(k_alpha_threshold, 1.0)
+    flo::output_params parse_output_params(const std::string out_file, const json& j) {
+        flo::output_params out{
+            out_file,
+            flo::hex_str_to_rgb("#ffffff"),
+            1.0
         };
+        if (j.contains(k_output)) {
+            const auto& out_params = j[k_output];
+            out.canvas_color = out_params.contains(k_canvas_color) ?
+                flo::hex_str_to_rgb(out_params[k_canvas_color].get<std::string>()) :
+                flo::hex_str_to_rgb("#ffffff");
+            out.alpha_threshold = out_params.value(k_alpha_threshold, 1.0);
+        }
+        return out;
     }
 
     flo::paint_mode parse_paint_mode(const json& json_value) {
@@ -267,10 +273,11 @@ namespace {
     }
 }
 
-std::expected<flo::input, std::string> flo::parse_input(const std::string& json_fname) {
-    std::ifstream file(json_fname);
+std::expected<flo::input, std::string> flo::parse_input(
+        const std::string& inp, const std::string& outp) {
+    std::ifstream file(inp);
     if (!file.is_open()) {
-        return std::unexpected("Failed to open file: " + json_fname);
+        return std::unexpected("Failed to open file: " + inp);
     }
 
     try {
@@ -284,7 +291,7 @@ std::expected<flo::input, std::string> flo::parse_input(const std::string& json_
             parsed_input.rand_seed = j[k_rand_seed].get<uint32_t>();
         }
 
-        parsed_input.output = parse_output_params(j[k_output]);
+        parsed_input.output = parse_output_params(outp, j);
 
         for (const auto& color_str : j[k_palette]) {
             parsed_input.palette.push_back(hex_str_to_rgb(color_str.get<std::string>()));

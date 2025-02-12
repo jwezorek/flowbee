@@ -16,6 +16,8 @@ namespace flo {
         std::vector<layer_params> layers;
     };
 
-    std::expected<input, std::string> parse_input(const std::string& fname);
+    std::expected<input, std::string> parse_input(
+        const std::string& inp, const std::string& outp
+    );
 
 }

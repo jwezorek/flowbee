@@ -109,14 +109,14 @@ namespace {
 
     void display_progress(int iters, const flo::canvas& canv, const flo::flowbee_params& params) {
         if (iters == 0) {
-            std::print("  ");
+            std::print("    ");
         }
         iters++;
         if (iters % 50 == 0) {
             std::print(".");
         }
         if (iters > 0 && iters % 500 == 0) {
-            std::print(" {:.4f}%\n  ",
+            std::print(" {:.4f}%\n    ",
                 100.0 * pcnt_done(canv, iters, params)
             );
         }
@@ -228,15 +228,6 @@ namespace {
         return iters;
     }
 }
-
-/*
-flo::output_params::output_params(const std::string& fname) :
-    filename{ fname },
-    canvas_color{ 255,255,255 },
-    alpha_threshold(1.0)
-{
-}
-*/
 
 flo::flowbee_params::flowbee_params(const brush_params& b, int iters, int n_particles) :
     brush(b),
