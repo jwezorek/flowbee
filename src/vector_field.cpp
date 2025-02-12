@@ -435,6 +435,47 @@ flo::vector_field flo::gradient(const scalar_field& img, int kernel_sz, bool ham
     return grad;
 }
 
+flo::vector_field flo::gravity(const dimensions& dim, const std::vector<point_mass>& masses, double grav_const, bool normalize) {
+    vector_field field{ 
+        scalar_field(dim.wd, dim.hgt, 0.0), 
+        scalar_field(dim.wd, dim.hgt, 0.0) 
+    };
+
+    for (auto [x,y] : locations(dim)) {
+        double field_x = 0.0, field_y = 0.0;
+
+        for (const auto& mass : masses) {
+            double dx = mass.loc.x - x;
+            double dy = mass.loc.y - y;
+            double dist_sq = dx * dx + dy * dy;
+            double dist = std::sqrt(dist_sq);
+
+            if (dist_sq > 1e-6) { // Avoid singularity
+                double force = grav_const * mass.mass / dist_sq;
+                field_x += force * (dx / dist);
+                field_y += force * (dy / dist);
+            }
+        }
+
+        if (normalize) {
+            double magnitude = std::hypot(field_x, field_y);
+            if (magnitude > 1e-6) {
+                field_x /= magnitude;
+                field_y /= magnitude;
+            }
+            else {
+                field_x = 0.0;
+                field_y = 0.0;
+            }
+        }
+
+        field.x[x, y] = field_x;
+        field.y[x, y] = field_y;
+    }
+
+    return field;
+}
+
 flo::vector_field flo::operator*(const point& v, const vector_field& field) {
     return {
         v.x * field.x,

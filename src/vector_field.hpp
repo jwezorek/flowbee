@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "types.hpp"
+#include <vector>
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -32,6 +33,14 @@ namespace flo {
         const dimensions& dim, double b, bool inward, bool clockwise);
     vector_field zigzag_vector_field(const dimensions& dim, double radius);
     vector_field gradient(const scalar_field& img, int kernel_sz, bool hamiltonian);
+
+    struct point_mass {
+        double mass;
+        flo::point loc;
+    };
+    vector_field gravity(const dimensions& dim, const std::vector<point_mass>& masses,
+        double grav_const = 1.0, bool normalize = true);
+
     vector_field operator*(const point& v, const vector_field& field);
     vector_field operator*(double k, const vector_field& field);
     vector_field operator+(const point& v, const vector_field& field);
