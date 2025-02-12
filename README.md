@@ -102,5 +102,4 @@ The following JSON file generates the image above:
 ## License
 
 Flowbee is licensed for non-commercial use under the [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) license.
- ... seriously. I don't even know what this is going to be yet -- but want a place to experiment with some ideas.
 
