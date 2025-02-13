@@ -44,7 +44,7 @@ namespace {
     const std::string k_delta_t = "delta_t";
     const std::string k_num_particles = "num_particles";
     const std::string k_populate_white_space = "populate_white_space";
-    const std::string k_iterations = "iterations";
+    const std::string k_termination_criterion = "termination_criterion";
     const std::string k_palette_subset = "palette_subset";
     const std::string k_diffusion_rate = "diffusion_rate";
     const std::string k_jitter = "jitter";
@@ -278,9 +278,9 @@ namespace {
         params.num_particles = j[k_num_particles].get<int>();
         params.populate_white_space = j[k_populate_white_space].get<bool>();
 
-        if (j.contains(k_iterations)) {
-            params.iterations = j[k_iterations].get<int>();
-        }
+        params.termination_criterion = (j.contains(k_termination_criterion)) ?
+            j[k_termination_criterion].get<double>() :
+            1.0;
 
         if (j.contains(k_palette_subset)) {
             for (const auto& index : j[k_palette_subset]) {
@@ -323,6 +323,7 @@ std::expected<flo::input, std::string> flo::parse_input(
 
         if (j.contains(k_rand_seed)) {
             parsed_input.rand_seed = j[k_rand_seed].get<uint32_t>();
+            set_rand_seed(*parsed_input.rand_seed);
         }
 
         parsed_input.output = parse_output_params(outp, j);

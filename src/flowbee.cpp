@@ -90,21 +90,22 @@ namespace {
         return p;
     }
 
-    bool is_done(const flo::canvas& canv, int iters, const flo::flowbee_params& params) {
-        if (params.iterations) {
-            return iters >= params.iterations.value();
-        }
-        return canv.num_blank_locs() == 0;
-    }
-
     double pcnt_done(const flo::canvas& canv, int iters, const flo::flowbee_params& params) {
         
-        if (params.iterations) {
-            return static_cast<double>(iters) / static_cast<double>(*params.iterations);
+        if (params.termination_criterion > 1.0) {
+            return static_cast<double>(iters) / static_cast<double>(params.termination_criterion);
         }
         auto dim = canv.bounds();
         auto area = static_cast<double>(dim.wd * dim.hgt);
         return (area - static_cast<double>(canv.num_blank_locs())) / area;
+    }
+
+    bool is_done(const flo::canvas& canv, int iters, const flo::flowbee_params& params) {
+        if (params.termination_criterion > 1.0) {
+            int max_iters = static_cast<int>(params.termination_criterion);
+            return iters >= max_iters;
+        }
+        return pcnt_done(canv, iters, params) > params.termination_criterion;
     }
 
     void display_progress(int iters, const flo::canvas& canv, const flo::flowbee_params& params) {
@@ -172,8 +173,8 @@ namespace {
             params.palette_subset;
 
         std::optional<double> total_time;
-        if (params.iterations) {
-            total_time = *params.iterations * params.delta_t;
+        if (params.termination_criterion > 1.0) {
+            total_time = params.termination_criterion * params.delta_t;
         }
 
         std::vector<paint_glob> particles = rv::iota(0, params.num_particles) | rv::transform(
@@ -235,7 +236,7 @@ flo::flowbee_params::flowbee_params(const brush_params& b, int iters, int n_part
     max_particle_history(10),
     dead_particle_area_sz(3.0),
     delta_t(1.0),
-    iterations(iters),
+    termination_criterion(iters),
     num_particles(n_particles),
     populate_white_space(true)
 {
@@ -244,7 +245,7 @@ flo::flowbee_params::flowbee_params(const brush_params& b, int iters, int n_part
 flo::flowbee_params::flowbee_params(const brush_params& b, int n_particles) :
     flowbee_params(b, 0, n_particles)
 {
-    iterations = {};
+    termination_criterion = 1.0;
 }
 
 void flo::do_flowbee(

@@ -49,10 +49,6 @@ int main(int argc, char* argv[]) {
 
     auto start_time = std::chrono::high_resolution_clock::now();
 
-    if (input->rand_seed) {
-        flo::set_rand_seed(*input->rand_seed);
-    }
-
     flo::do_flowbee(
         input->output,
         input->palette,

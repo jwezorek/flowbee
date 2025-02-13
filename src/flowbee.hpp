@@ -27,7 +27,7 @@ namespace flo {
         int max_particle_history;
         double dead_particle_area_sz;
         double delta_t;
-        std::optional<int> iterations;
+        double termination_criterion;
         int num_particles;
         bool populate_white_space;
         std::vector<int> palette_subset; 
