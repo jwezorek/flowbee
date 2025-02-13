@@ -10,19 +10,17 @@
 namespace flo {
 
     class paint_particle {
-        double volume_;
         std::vector<double> mixture_;
-
-        void fix_sign();
 
         friend paint_particle operator*(double k, const paint_particle& p);
         friend paint_particle& operator+=(paint_particle& paint_lhs, const paint_particle& paint_rhs);
 
     public:
-        paint_particle(double volume = 0.0, const std::vector<double>& mixture = {});
-        double volume() const;
+        paint_particle(const std::vector<double>& mixture = {});
         const std::vector<double>& mixture() const;
+        std::vector<double>& mixture();
         void normalize();
+        double volume() const;
     };
 
     paint_particle operator*(double k, const paint_particle& paint);

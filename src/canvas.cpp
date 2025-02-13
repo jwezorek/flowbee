@@ -62,7 +62,7 @@ flo::canvas::canvas(const std::vector<rgb_color>& palette, int wd, int hgt) :
         palette | rv::transform( to_pigment ) | r::to<std::vector>()
     },
     impl_{
-        wd, hgt, {0.0, std::vector<double>(palette.size(), 0.0)}
+        wd, hgt, std::vector<double>(palette.size(), 0.0)
     }
 {
 }
@@ -207,7 +207,7 @@ flo::image flo::canvas_to_image(const canvas& canv, double alpha_threshold,
 }
 
 flo::paint_particle flo::all_paint_in_brush_region(canvas& canvas, const point& loc, double radius, int aa_level) {
-    flo::paint_particle sum(0.0, std::vector<double>(canvas.palette_size(), 0.0));
+    flo::paint_particle sum(std::vector<double>(canvas.palette_size(), 0.0));
     auto& canv = canvas.cells();
     for (const auto& [loc, paint_pcnt] : brush_region(canv.bounds(), loc, radius, aa_level)) {
         sum += paint_pcnt * canv[loc];

@@ -105,7 +105,7 @@ namespace {
             int max_iters = static_cast<int>(params.termination_criterion);
             return iters >= max_iters;
         }
-        return pcnt_done(canv, iters, params) > params.termination_criterion;
+        return pcnt_done(canv, iters, params) >= params.termination_criterion;
     }
 
     void display_progress(int iters, const flo::canvas& canv, const flo::flowbee_params& params) {
