@@ -1,6 +1,8 @@
 #pragma once
 
 #include "types.hpp"
+#include "pigment.hpp"
+#include "matrix_3d.hpp"
 #include "paint_particle.hpp"
 
 /*------------------------------------------------------------------------------------------------*/
@@ -9,15 +11,15 @@ namespace flo {
 
     class canvas {
         std::vector<pigment> palette_;
-        matrix<paint_mixture> impl_;
+        matrix_3d<double> impl_;
     public:
         canvas() {}
         canvas(const std::vector<rgb_color>& palette, int wd, int hgt);
         canvas(const std::vector<rgb_color>& palette, const dimensions& dim);
         canvas(const std::vector<rgb_color>& palette, int wd, int hgt, int bkgd, double amnt);
 
-        matrix<paint_mixture>& cells();
-        const matrix<paint_mixture>& cells() const;
+        matrix_3d<double>& cells();
+        const matrix_3d<double>& cells() const;
 
         int cols() const;
         int rows() const;
@@ -28,6 +30,7 @@ namespace flo {
         int palette_size() const;
         int num_blank_locs() const;
         std::vector<coords> blank_locs() const;
+        double volume_at(int x, int y) const;
     };
 
     double brush_region_area(const dimensions& canvas_dimensions,

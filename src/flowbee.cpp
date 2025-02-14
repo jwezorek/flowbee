@@ -130,7 +130,7 @@ namespace {
         auto& cells = canvas.cells();
         auto dims = canvas.bounds();
 
-        flo::matrix<flo::paint_mixture> new_cells = cells;
+        flo::matrix_3d<double> new_cells = cells;
 
         for (int y = 1; y < dims.hgt - 1; ++y) {
             for (int x = 1; x < dims.wd - 1; ++x) {

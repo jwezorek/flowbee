@@ -12,6 +12,9 @@ double flo::volume(const paint_mixture& p)
 
 void flo::normalize_in_place(paint_mixture& p) {
     auto sum = volume(p);
+    if (sum == 0.0) {
+        return;
+    }
     for (auto& val : p) {
         val /= sum;
     }

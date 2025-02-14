@@ -25,9 +25,33 @@ namespace {
         return std::filesystem::path(str).filename().string();
     }
 
+    void test() {
+        std::vector<flo::rgb_color> pal = { {255,255,255},{255,0,0} };
+        flo::canvas canv(pal, 100, 100);
+        flo::brush_params br_params = {
+            .radius = 10.0,
+            .mix = true,
+            .mode = flo::paint_mode::fill,
+            .aa_level = 4,
+            .paint_transfer_coeff = 0.75,
+        };
+        flo::brush br(br_params, { 0.0,1.0 });
+        br.apply(canv, { 50.0,50.0 }, { 1.0, 0 });
+        br.apply(canv, { 52.0,50.0 }, { 1.0, 1.0 });
+
+        flo::img_to_file(
+            "D:\\test\\debug_flat_canv.png",
+            flo::canvas_to_image(
+                canv, 1.0, { 255,255,255 }
+            )
+        );
+    }
+
 }
 
 int main(int argc, char* argv[]) {
+
+    //test();
 
     if (argc != 3) {
         for (int i = 0; i < argc; ++i) {

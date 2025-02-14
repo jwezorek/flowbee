@@ -62,7 +62,7 @@ flo::canvas::canvas(const std::vector<rgb_color>& palette, int wd, int hgt) :
         palette | rv::transform( to_pigment ) | r::to<std::vector>()
     },
     impl_{
-        wd, hgt, std::vector<double>(palette.size(), 0.0)
+        wd, hgt, static_cast<int>(palette.size()), 0.0
     }
 {
 }
@@ -81,11 +81,11 @@ flo::canvas::canvas( const std::vector<rgb_color>& palette, int wd, int hgt, int
     }
 }
 
-flo::matrix<flo::paint_mixture>& flo::canvas::cells() {
+flo::matrix_3d<double>& flo::canvas::cells() {
     return impl_;
 }
 
-const flo::matrix<flo::paint_mixture>& flo::canvas::cells() const {
+const flo::matrix_3d<double>& flo::canvas::cells() const {
     return impl_;
 }
 
@@ -110,7 +110,7 @@ flo::pigment flo::canvas::color_at(int x, int y) const {
 
     for (auto [i, pigment] : rv::enumerate(palette_)) {
         const auto& particle = impl_[x, y];
-        color_to_weight[pigment] = particle.at(i);
+        color_to_weight[pigment] = particle[i];
     }
 
     return mix_paint(color_to_weight);
@@ -123,9 +123,10 @@ int flo::canvas::palette_size() const {
 int flo::canvas::num_blank_locs() const
 {
     return r::count_if(
-        impl_.entries(),
-        [](auto&& pp) {
-            return volume(pp) == 0.0;
+        locations(impl_.bounds()),
+        [&](auto&& pp) {
+            auto [x, y] = pp;
+            return volume_at(x,y) == 0.0;
         }
     );
 }
@@ -135,7 +136,7 @@ std::vector<flo::coords> flo::canvas::blank_locs() const
     return locations(impl_.bounds()) | rv::filter(
             [&](auto&& pair) {
                 auto [x, y] = pair;
-                return volume(impl_[x, y]) == 0.0;
+                return volume_at(x, y) == 0.0;
             }
         ) | rv::transform(
             [&](auto&& pair)->coords {
@@ -143,6 +144,15 @@ std::vector<flo::coords> flo::canvas::blank_locs() const
                 return { x,y };
             }
         ) | r::to<std::vector>();
+}
+
+double flo::canvas::volume_at(int x, int y) const
+{
+    double vol = 0;
+    for (auto v : impl_[x, y]) {
+        vol += v;
+    }
+    return vol;
 }
 
 double flo::brush_region_area(const dimensions& dim, const point& loc, double rad, int aa) {
@@ -196,7 +206,7 @@ flo::image flo::canvas_to_image(const canvas& canv, double alpha_threshold,
     flo::image img(canv.bounds());
     for (auto [x, y] : locations(img.bounds())) {
         auto pigment = canv.color_at(x, y);
-        auto volume = flo::volume(canv.cells()[x, y]);
+        auto volume = canv.volume_at(x, y);
         if (alpha_threshold > 0.0) {
             auto alpha = (volume >= alpha_threshold) ? 1.0 : volume / alpha_threshold;
             pigment = mix_pigments(bkgd, (1.0 - alpha), pigment, alpha);
@@ -210,7 +220,7 @@ flo::paint_mixture flo::all_paint_in_brush_region(canvas& canvas, const point& l
     flo::paint_mixture sum(std::vector<double>(canvas.palette_size(), 0.0));
     auto& canv = canvas.cells();
     for (const auto& [loc, paint_pcnt] : brush_region(canv.bounds(), loc, radius, aa_level)) {
-        sum += paint_pcnt * canv[loc];
+        sum += paint_pcnt * flo::paint_mixture{ canv[loc] };
     }
     return sum;
 }
