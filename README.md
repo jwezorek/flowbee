@@ -13,7 +13,7 @@ The code is C++23 with no external dependencies except Boost which is currently 
 
 The library [mixbox](https://scrtwpns.com/mixbox/) in particular is doing heavy lifting in this project; i.e., I didn't personally implement the Kubelka–Munk model of color mixing used here.
 
-The main problem with this code right now is that it is slow. I think the major optimizations that could be done would be to use an expression template implementation of arithmetic over paint mixtures perhaps by changing the implementation to use Eigen for the main 2D and 3D array classes rather than my roll-your-own matrix classes. The other big optimization possible would be to perform the main painting loop such that non-overlapping paint particles are simulated in parallel.
+The main problem with this code right now is that it is slow. I think the major optimizations that could be done would be to use an expression template implementation of arithmetic over paint mixtures perhaps by changing the implementation to use Eigen for the main 1D, 2D, and 3D array classes rather than my roll-your-own matrix classes. The other big optimization possible would be to perform the main painting loop such that non-overlapping paint particles are simulated in parallel.
 
 ## Usage
 
