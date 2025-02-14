@@ -52,7 +52,7 @@ namespace {
         return flo::to_point(blank_locs.at(index));
     }
 
-    paint_particle random_paint_glob(
+    paint_particle random_paint_particle(
             const flo::canvas& canv,
             const flo::brush_params& params,
             const std::vector<int> palette,
@@ -181,7 +181,7 @@ namespace {
 
         std::vector<paint_particle> particles = rv::iota(0, params.num_particles) | rv::transform(
             [&](auto)->paint_particle {
-                return random_paint_glob(canvas, params.brush, palette, false, elapsed, total_time);
+                return random_paint_particle(canvas, params.brush, palette, false, elapsed, total_time);
             }
         ) | r::to<std::vector>();
 
@@ -213,7 +213,7 @@ namespace {
 
             while (particles.size() < params.num_particles) {
                 particles.push_back(
-                    random_paint_glob(
+                    random_paint_particle(
                         canvas, params.brush, palette, params.populate_white_space,
                         elapsed, total_time
                     )
