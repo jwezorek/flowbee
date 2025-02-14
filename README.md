@@ -5,6 +5,14 @@
 
 Flowbee is a tool for generating images of paint particles moving in vector fields, mixing in a semi-realistic manner. 
 
+# Implementation Details
+
+The code is C++23 with no external dependencies except Boost which is currently only being used for boost::hash_combine so would be easy to remove. Other third-party dependencies -- stb_image, mixbox, siv::PerlinNoise, and nlohmann::json -- are vendored in the third-party/ folder, meaning their source code is included directly in the project rather than being linked as external libraries.
+
+The library [mixbox](https://scrtwpns.com/mixbox/) in particular is doing heavy lifting in this project; i.e., I didn't personally implement the Kubelka–Munk model of color mixing used here.
+
+The main problem with this code right now is that it is slow. I think the major optimizations that could be done would be to use an expression template implementation of arithmetic over paint mixtures perhaps by changing the implementation to use Eigen for the main 2D and 3D array classes rather than my roll-your-own matrix classes. The other big optimization possible would be to perform the main painting loop such that non-overlapping paint particles are simulated in parallel.
+
 ## Usage
 
 To run Flowbee, pass a JSON file specifying the parameters along with an output file path where the generated image will be saved:
