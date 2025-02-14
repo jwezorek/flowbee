@@ -5,6 +5,8 @@
 
 Flowbee is a tool for generating images of paint particles moving in vector fields, mixing in a semi-realistic manner. 
 
+The core concept is to construct a dynamic vector field by blending primitive vector components—such as circular flows, Perlin noise, and other patterns. Within this field, simulated paint particles move across the canvas, their trajectories shaped by the underlying flow. As they travel, these particles interact with existing paint, gradually shifting in color through a process of continuous mixing. Particles that become trapped in knots or sinks within the vector field, or those that drift beyond the canvas bounds, are removed and replaced with new random particles.
+
 # Implementation Details
 
 The code is C++23 with no external dependencies except Boost which is currently only being used for boost::hash_combine so would be easy to remove. Other third-party dependencies -- stb_image, mixbox, siv::PerlinNoise, and nlohmann::json -- are vendored in the third-party/ folder, meaning their source code is included directly in the project rather than being linked as external libraries.
