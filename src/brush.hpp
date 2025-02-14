@@ -81,12 +81,12 @@ namespace flo {
         paint_mode mode_;
         int aa_level_;
         double paint_transfer_coeff_;
-        paint_particle paint_;
+        paint_mixture paint_;
         std::optional<double> lifespan_;
         bool alive_;
     public:
         brush() {}
-        brush(const brush_params& params, const paint_particle& p);
+        brush(const brush_params& params, const paint_mixture& p);
         void apply(canvas& canv, const point& loc, const elapsed_time& t);
         bool is_alive() const;
         std::optional<double> lifespan() const;

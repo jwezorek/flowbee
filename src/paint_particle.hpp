@@ -9,27 +9,18 @@
 
 namespace flo {
 
-    class paint_particle {
-        std::vector<double> mixture_;
+    using paint_mixture = std::vector<double>;
 
-        friend paint_particle operator*(double k, const paint_particle& p);
-        friend paint_particle& operator+=(paint_particle& paint_lhs, const paint_particle& paint_rhs);
+    paint_mixture operator*(double k, const paint_mixture& paint);
+    paint_mixture& operator+=(paint_mixture& lhs, const paint_mixture& rhs);
+    paint_mixture& operator-=(paint_mixture& lhs, const paint_mixture& rhs);
+    paint_mixture operator+(const paint_mixture& lhs, const paint_mixture& rhs);
+    paint_mixture operator-(const paint_mixture& lhs, const paint_mixture& rhs);
 
-    public:
-        paint_particle(const std::vector<double>& mixture = {});
-        const std::vector<double>& mixture() const;
-        std::vector<double>& mixture();
-        void normalize();
-        double volume() const;
-    };
+    double volume(const paint_mixture& p);
+    void normalize_in_place(paint_mixture& p);
+    paint_mixture normalize(const paint_mixture& p);
 
-    paint_particle operator*(double k, const paint_particle& paint);
-    paint_particle& operator+=(paint_particle& lhs, const paint_particle& rhs);
-    paint_particle& operator-=(paint_particle& lhs, const paint_particle& rhs);
-    paint_particle operator+(const paint_particle& lhs, const paint_particle& rhs);
-    paint_particle operator-(const paint_particle& lhs, const paint_particle& rhs);
-    paint_particle normalize(const paint_particle& p);
-
-    paint_particle make_one_color_paint(int palette_sz, int color_index, double volume);
-    std::string display(const paint_particle& p);
+    paint_mixture make_one_color_paint(int palette_sz, int color_index, double volume);
+    std::string display(const paint_mixture& p);
 }

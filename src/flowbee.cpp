@@ -1,4 +1,5 @@
 #include "flowbee.hpp"
+#include "paint_particle.hpp"
 #include <deque>
 #include <ranges>
 
@@ -124,15 +125,17 @@ namespace {
     }
 
     void apply_laplacian_diffusion(flo::canvas& canvas, double diffusion_rate) {
+        using namespace flo;
+
         auto& cells = canvas.cells();
         auto dims = canvas.bounds();
 
-        flo::matrix<flo::paint_particle> new_cells = cells;
+        flo::matrix<flo::paint_mixture> new_cells = cells;
 
         for (int y = 1; y < dims.hgt - 1; ++y) {
             for (int x = 1; x < dims.wd - 1; ++x) {
                 // Compute the Laplacian: sum of neighbors minus 4 * center
-                flo::paint_particle laplacian =
+                flo::paint_mixture laplacian =
                     cells[x + 1, y] + cells[x - 1, y] +
                     cells[x, y + 1] + cells[x, y - 1] -
                     4.0 * cells[x, y];

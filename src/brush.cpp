@@ -108,7 +108,7 @@ std::vector<flo::region_pixel> flo::detail::brush_region_aux(
     ) | r::to<std::vector>();
 }
 
-flo::brush::brush(const brush_params& params, const paint_particle& p) : 
+flo::brush::brush(const brush_params& params, const paint_mixture& p) :
         radius_(params.radius),
         ramp_in_time_(params.radius_ramp_in_time),
         mix_(params.mix),
@@ -134,10 +134,10 @@ void flo::brush::apply(canvas& canv, const point& loc, const elapsed_time& t) {
             brush_region_area(canv.bounds(), loc, radius, aa_level_);
         auto paint_on_canvas =
             all_paint_in_brush_region(canv, loc, radius, aa_level_);
-        paint_on_canvas.normalize();
+        normalize_in_place(paint_on_canvas);
 
         auto k = paint_transfer_coeff_;
-        auto new_paint = (paint_on_canvas.volume() > 0.0) ?
+        auto new_paint = (volume(paint_on_canvas) > 0.0) ?
             (1.0 - k) * paint_on_canvas + k * paint_ :
             paint_;
 
