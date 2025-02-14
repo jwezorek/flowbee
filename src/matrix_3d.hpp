@@ -41,7 +41,6 @@ namespace flo {
                 return data_[i];
             }
 
-            // Assignment operator to assign from a vector
             cell_proxy& operator=(const std::vector<T>& values) {
                 if (values.size() != static_cast<size_t>(layers_)) {
                     throw std::invalid_argument("Vector size must match the number of layers.");
@@ -63,23 +62,6 @@ namespace flo {
                     data_[i] += other.data_[i];
                 }
                 return *this;
-            }
-
-            //cell_proxy operator+(cell_proxy other) {
-            //    return *this += other;
-            //}
-
-            void clamp_nonnegative() {
-                for (int i = 0; i < layers_; ++i) {
-                    data_[i] = (data_[i] >= 0.0) ? data_[i] : 0.0;
-                }
-            }
-
-            static friend cell_proxy operator*(double k, cell_proxy proxy) {
-                for (int i = 0; i < proxy.layers_; ++i) {
-                    proxy.data_[i] *= k;
-                }
-                return proxy;
             }
         };
 
