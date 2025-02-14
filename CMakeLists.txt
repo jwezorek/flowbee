@@ -13,7 +13,7 @@ add_executable(flowbee
     src/third-party/mixbox.cpp
     src/main.cpp
     src/util.cpp
-    src/paint_particle.cpp 
+    src/paint_mixture.cpp
     src/brush.cpp
     src/canvas.cpp
     src/pigment.cpp

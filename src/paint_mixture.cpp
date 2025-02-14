@@ -1,4 +1,4 @@
-#include "paint_particle.hpp"
+#include "paint_mixture.hpp"
 namespace r = std::ranges;
 namespace rv = std::ranges::views;
 

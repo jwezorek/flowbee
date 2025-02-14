@@ -3,7 +3,7 @@
 #include "types.hpp"
 #include "pigment.hpp"
 #include "matrix_3d.hpp"
-#include "paint_particle.hpp"
+#include "paint_mixture.hpp"
 
 /*------------------------------------------------------------------------------------------------*/
 

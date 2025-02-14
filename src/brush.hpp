@@ -6,7 +6,7 @@
 #include <optional>
 #include "types.hpp"
 #include "canvas.hpp"
-#include "paint_particle.hpp"
+#include "paint_mixture.hpp"
 #include "util.hpp"
 
 /*------------------------------------------------------------------------------------------------*/

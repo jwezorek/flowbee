@@ -1,7 +1,7 @@
 
 #include "util.hpp"
 #include "vector_field.hpp"
-#include "paint_particle.hpp"
+#include "paint_mixture.hpp"
 #include "canvas.hpp"
 #include "brush.hpp"
 #include "flowbee.hpp"

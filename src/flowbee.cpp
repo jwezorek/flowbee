@@ -1,5 +1,5 @@
 #include "flowbee.hpp"
-#include "paint_particle.hpp"
+#include "paint_mixture.hpp"
 #include <deque>
 #include <ranges>
 
@@ -10,13 +10,13 @@ namespace rv = std::ranges::views;
 
 namespace {
 
-    struct paint_glob {
+    struct paint_particle {
         double elapsed;
         flo::brush brush;
         std::deque<flo::point> history;
     };
 
-    bool is_particle_alive(const paint_glob& p, const flo::dimensions& bounds, 
+    bool is_particle_alive(const paint_particle& p, const flo::dimensions& bounds, 
             int max_particle_history, int dead_particle_area_sz) {
         if (!p.brush.is_alive()) {
             return false;
@@ -52,7 +52,7 @@ namespace {
         return flo::to_point(blank_locs.at(index));
     }
 
-    paint_glob random_paint_glob(
+    paint_particle random_paint_glob(
             const flo::canvas& canv,
             const flo::brush_params& params,
             const std::vector<int> palette,
@@ -82,7 +82,7 @@ namespace {
             }
         }
 
-        paint_glob p = {
+        paint_particle p = {
             0.0,
             brush,
             {}
@@ -180,8 +180,8 @@ namespace {
             total_time = params.termination_criterion * params.delta_t;
         }
 
-        std::vector<paint_glob> particles = rv::iota(0, params.num_particles) | rv::transform(
-            [&](auto)->paint_glob {
+        std::vector<paint_particle> particles = rv::iota(0, params.num_particles) | rv::transform(
+            [&](auto)->paint_particle {
                 return random_paint_glob(canvas, params.brush, palette, false, elapsed, total_time);
             }
         ) | r::to<std::vector>();
