@@ -127,25 +127,24 @@ namespace {
     void apply_laplacian_diffusion(flo::canvas& canvas, double diffusion_rate) {
         using namespace flo;
 
-        auto& cells = canvas.cells();
         auto dims = canvas.bounds();
 
-        flo::matrix_3d<double> new_cells = cells;
+        auto new_cells = canvas;
 
         for (int y = 1; y < dims.hgt - 1; ++y) {
             for (int x = 1; x < dims.wd - 1; ++x) {
                 // Compute the Laplacian: sum of neighbors minus 4 * center
                 flo::paint_mixture laplacian =
-                    cells[x + 1, y] + cells[x - 1, y] +
-                    cells[x, y + 1] + cells[x, y - 1] -
-                    4.0 * cells[x, y];
+                    canvas[x + 1, y] + canvas[x - 1, y] +
+                    canvas[x, y + 1] + canvas[x, y - 1] -
+                    4.0 * canvas[x, y];
 
                 // Diffuse paint based on the Laplacian (scaled by diffusion rate)
-                new_cells[x, y] = cells[x, y] + diffusion_rate * laplacian;
+                new_cells[x, y] = canvas[x, y] + diffusion_rate * laplacian;
             }
         }
 
-        cells = std::move(new_cells);
+        canvas = std::move(new_cells);
     }
 
     flo::point position_delta(

@@ -18,8 +18,21 @@ namespace flo {
         canvas(const std::vector<rgb_color>& palette, const dimensions& dim);
         canvas(const std::vector<rgb_color>& palette, int wd, int hgt, int bkgd, double amnt);
 
-        matrix_3d<double>& cells();
-        const matrix_3d<double>& cells() const;
+        inline auto operator[](const coords& loc) {
+            return impl_[loc];
+        }
+
+        inline auto operator[](const coords& loc) const {
+            return impl_[loc];
+        }
+
+        inline auto operator[](int x, int y) {
+            return impl_[x,y];
+        }
+
+        inline auto operator[](int x, int y) const {
+            return impl_[x,y];
+        }
 
         int cols() const;
         int rows() const;
