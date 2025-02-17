@@ -5,7 +5,7 @@
 
 Flowbee is a tool for generating images of paint particles moving in vector fields, mixing in a semi-realistic manner. 
 
-The core concept is to construct a dynamic vector field by blending primitive vector components—such as circular flows, Perlin noise, and other patterns. Within this field, simulated paint particles move across the canvas, their trajectories shaped by the underlying flow. As they travel, these particles interact with existing paint, gradually shifting in color through a process of continuous mixing. Particles that become trapped in knots or sinks within the vector field, or those that drift beyond the canvas bounds, are removed and replaced with new random particles.
+The core concept is to construct a dynamic vector field by blending primitive vector components—such as circular flows, Perlin noise, and other patterns. Within this field, simulated paint particles move across the canvas, their trajectories shaped by the underlying flow. As they travel, these particles deposit paint and interact with existing paint, gradually shifting in color through a process of continuous mixing. Particles that become trapped in knots or sinks within the vector field, or those that drift beyond the canvas bounds, are removed and replaced with new random particles.
 
 # Implementation Details
 
