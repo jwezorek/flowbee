@@ -46,5 +46,4 @@ namespace flo {
     vector_field operator+(const point& v, const vector_field& field);
     vector_field operator+(double k, const vector_field& field);
     vector_field operator+(const vector_field& lhs, const vector_field& rhs);
-    scalar_field pow(const scalar_field& field, double exp);
 }

@@ -9,6 +9,13 @@ namespace rv = std::ranges::views;
 
 namespace {
 
+    flo::scalar_field signed_pow(const flo::scalar_field& field, double exp) {
+        auto power = [exp](double v) {
+            return flo::sgn(v) * std::pow(std::abs(v), exp);
+            };
+        return field.transform_to(power);
+    }
+
     flo::matrix<double> gaussian_neighborhood(int sz) {
         if (sz % 2 == 0) {
             throw std::invalid_argument("Size must be odd");
@@ -180,13 +187,13 @@ flo::vector_field flo::perlin_vector_field(
     auto x_noise = perlin_noise(sz, octaves, freq);
     auto y_noise = perlin_noise(sz, octaves, freq);
 
-    if (exponent != 1.0) {
-        x_noise = pow(x_noise, exponent);
-        y_noise = pow(y_noise, exponent);
-    }
-
     auto x_comp = 2.0 * x_noise - 1.0;
     auto y_comp = 2.0 * y_noise - 1.0;
+
+    if (exponent != 1.0) {
+        x_noise = signed_pow(x_noise, exponent);
+        y_noise = signed_pow(y_noise, exponent);
+    }
 
     if (normalized) {
         return normalized_vector_field(x_comp, y_comp);
@@ -515,9 +522,4 @@ flo::vector_field flo::operator+(const vector_field& lhs, const vector_field& rh
     };
 }
 
-flo::scalar_field flo::pow(const scalar_field& field, double exp) {
-    auto power = [exp](double v) {
-        return std::pow(v, exp);
-    };
-    return field.transform_to(power);
-}
+
