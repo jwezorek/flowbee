@@ -113,3 +113,11 @@ The following JSON file generates the image above:
 
 Flowbee is licensed for non-commercial use under the [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) license.
 
+## More example output
+
+![flowbee_test_3](https://github.com/user-attachments/assets/05852be9-d1dc-483a-98e2-389091b027b1)
+
+![flowbee_rad_ramp_3](https://github.com/user-attachments/assets/e0b85aca-fe99-453e-858a-61d47cae8a15)
+![flowbee_loxo_ps](https://github.com/user-attachments/assets/a60c1b7d-201b-4ea8-a363-3b0b6c8be812)
+![flow3](https://github.com/user-attachments/assets/3588f9cd-66cc-4e69-82a3-a4ffe405c030)
+![perturbed_circular](https://github.com/user-attachments/assets/fbed7452-0f32-49d0-88cf-843693d56204)
