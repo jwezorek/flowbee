@@ -52,32 +52,44 @@ namespace {
 
         return kernel;
     }
-
+    /*
     flo::point tangent_of_loxodromic_spiral(
             bool outward,
-            double x, double y, double dist, double width, 
-            double height, double rho, double theta_rate) {
+            double x, double y, double dist, double width,
+            double height, double theta_rate) {
+
         using namespace flo;
-        // Calculate the spiral centers based on provided dimensions and distance
+
+        // Calculate the spiral centers
         point center1 = { width / 2.0 - dist / 2.0, height / 2.0 };
         point center2 = { width / 2.0 + dist / 2.0, height / 2.0 };
 
-        // Compute the gradient of the scalar potential field with scaling factor rho
-        double dx = rho * ((x - center2.x) / ((x - center2.x) * (x - center2.x) + (y - center2.y) * (y - center2.y))
-            - (x - center1.x) / ((x - center1.x) * (x - center1.x) + (y - center1.y) * (y - center1.y)));
+        // Compute distances to each spiral center
+        double r1 = std::sqrt((x - center1.x) * (x - center1.x) + (y - center1.y) * (y - center1.y)) + 1e-6;
+        double r2 = std::sqrt((x - center2.x) * (x - center2.x) + (y - center2.y) * (y - center2.y)) + 1e-6;
 
-        double dy = rho * ((y - center2.y) / ((x - center2.x) * (x - center2.x) + (y - center2.y) * (y - center2.y))
-            - (y - center1.y) / ((x - center1.x) * (x - center1.x) + (y - center1.y) * (y - center1.y)));
+        // Compute the gradient of the scalar potential field with scaling factor rho
+        double dx = (((x - center2.x) / (r2 * r2)) - ((x - center1.x) / (r1 * r1)));
+        double dy = (((y - center2.y) / (r2 * r2)) - ((y - center1.y) / (r1 * r1)));
 
         // Compute the tangent vector by rotating the gradient by 90 degrees
         double tangent_x = -dy;
         double tangent_y = dx;
 
-        // Apply additional rotation based on theta_rate to introduce spiraling effect
-        double angle = theta_rate * std::log(std::sqrt((x - center1.x) * (x - center1.x) + (y - center1.y) * (y - center1.y)) + 1e-6);
+        // Compute separate angles for each spiral and blend them
+        double angle1 = theta_rate * std::log(r1);
+        double angle2 = theta_rate * std::log(r2);
+
+        // Blend the angles based on inverse distance weighting
+        double weight1 = 1.0 / r1;
+        double weight2 = 1.0 / r2;
+        double angle = (weight1 * angle1 + weight2 * angle2) / (weight1 + weight2);
+
         if (outward) {
             angle += std::numbers::pi;
         }
+
+        // Apply rotation
         double rotated_x = tangent_x * std::cos(angle) - tangent_y * std::sin(angle);
         double rotated_y = tangent_x * std::sin(angle) + tangent_y * std::cos(angle);
 
@@ -88,6 +100,54 @@ namespace {
 
         // Return the normalized tangent vector field as point
         return point{ normalized_x, normalized_y };
+    }
+    */
+
+    flo::point tangent_of_loxodromic_spiral(
+            bool outward,
+            double x, double y, double dist, double width,
+            double height, double theta_rate) {
+
+        using namespace flo;
+
+        theta_rate = 1.0 / theta_rate;
+
+        // Define the spiral centers
+        point center1 = { width / 2.0 - dist / 2.0, height / 2.0 }; // Left center
+        point center2 = { width / 2.0 + dist / 2.0, height / 2.0 }; // Right center
+
+        // Compute polar coordinates relative to each center
+        double dx1 = x - center1.x, dy1 = y - center1.y;
+        double r1 = std::sqrt(dx1 * dx1 + dy1 * dy1) + 1e-6; // Avoid div by zero
+        double theta1 = std::atan2(dy1, dx1);
+
+        double dx2 = x - center2.x, dy2 = y - center2.y;
+        double r2 = std::sqrt(dx2 * dx2 + dy2 * dy2) + 1e-6;
+        double theta2 = std::atan2(dy2, dx2);
+
+        // Determine spiral directions
+        double direction1 = outward ? 1.0 : -1.0;  // Left spiral follows 'outward'
+        double direction2 = -direction1;          // Right spiral is the opposite
+
+        // Compute tangent vectors for logarithmic spirals
+        double tangent_x1 = direction1 * (-std::sin(theta1) + theta_rate * std::cos(theta1));
+        double tangent_y1 = direction1 * (std::cos(theta1) + theta_rate * std::sin(theta1));
+
+        double tangent_x2 = direction2 * (-std::sin(theta2) + theta_rate * std::cos(theta2));
+        double tangent_y2 = direction2 * (std::cos(theta2) + theta_rate * std::sin(theta2));
+
+        // Weight the influence of each spiral inversely by distance
+        double weight1 = 1.0 / (r1 + 1e-6);
+        double weight2 = 1.0 / (r2 + 1e-6);
+        double total_weight = weight1 + weight2;
+
+        // Blend the tangent vectors
+        double tangent_x = (tangent_x1 * weight1 + tangent_x2 * weight2) / total_weight;
+        double tangent_y = (tangent_y1 * weight1 + tangent_y2 * weight2) / total_weight;
+
+        // Normalize the final tangent vector
+        double magnitude = std::sqrt(tangent_x * tangent_x + tangent_y * tangent_y);
+        return point{ tangent_x / magnitude, tangent_y / magnitude };
     }
 
     flo::point logarithmic_spiral_vector(const flo::dimensions& dim, double x, double y, double b, bool inward, bool clockwise) {
@@ -330,7 +390,7 @@ flo::vector_field flo::loxodromic_spiral_vector_field(
     auto yy = flo::scalar_field(dim);
     for (auto [x, y] : flo::locations(dim)) {
         auto vec2 = tangent_of_loxodromic_spiral(
-            outward, x, y, centers_dist, dim.wd, dim.hgt, 0.15, theta_rate
+            outward, x, y, centers_dist, dim.wd, dim.hgt, theta_rate
         );
         xx[x, y] = vec2.x;
         yy[x, y] = vec2.y;
